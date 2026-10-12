@@ -1,0 +1,12 @@
+{
+  "name": "stock-purchasing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ระบบสต็อกและจัดซื้ออัตโนมัติสำหรับร้านอาหารหลายสาขา",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

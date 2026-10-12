@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบสต็อกและจัดซื้อ</title>
+<style>
+  :root {
+    --bg: #f5f4f0; --card: #fff; --ink: #1f2421; --muted: #6b716d; --line: #e3e1da;
+    --brand: #1f5f4a; --brand-soft: #e4efe9; --warn: #a15c00; --warn-soft: #fbefd9;
+    --bad: #a32a2a; --bad-soft: #f8e1e1;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", "Leelawadee UI", Tahoma, sans-serif; }
+  header { background: var(--brand); color: #fff; padding: 12px 16px 0; }
+  header h1 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
+  nav { display: flex; gap: 4px; overflow-x: auto; }
+  nav button { background: none; border: 0; color: #cfe3da; padding: 8px 14px; font: inherit; cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; }
+  nav button.on { background: var(--bg); color: var(--ink); font-weight: 600; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h2 { font-size: 16px; margin: 20px 0 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card b { display: block; font-size: 24px; line-height: 1.2; }
+  .card span { color: var(--muted); font-size: 13px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .panel > .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .panel > .head small { color: var(--muted); }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; background: #faf9f6; }
+  tr:last-child td { border-bottom: 0; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; background: var(--brand-soft); color: var(--brand); }
+  .tag.low { background: var(--warn-soft); color: var(--warn); }
+  .tag.out { background: var(--bad-soft); color: var(--bad); }
+  .diff { color: var(--bad); font-weight: 600; }
+  button.btn { background: var(--brand); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer; }
+  button.btn.ghost { background: none; color: var(--brand); border: 1px solid var(--brand); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .seg button { background: var(--card); border: 1px solid var(--line); padding: 6px 12px; font: inherit; cursor: pointer; }
+  .seg button:first-child { border-radius: 8px 0 0 8px; }
+  .seg button:last-child { border-radius: 0 8px 8px 0; }
+  .seg button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+  input[type=number] { width: 84px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; text-align: right; }
+  select { max-width: 260px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--card); }
+  input[type=search] { min-width: 260px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+  textarea { width: 100%; min-height: 180px; border: 0; border-top: 1px solid var(--line); padding: 12px 14px; font: 13px/1.5 Consolas, monospace; resize: vertical; }
+  .empty { color: var(--muted); padding: 18px 14px; }
+  .foot { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <h1>สต็อกและจัดซื้อ</h1>
+  <nav id="nav"></nav>
+</header>
+<main id="view"></main>
+
+<script>
+const TABS = [['dash', 'ภาพรวม'], ['count', 'นับสต็อก'], ['suggest', 'แนะนำสั่งซื้อ'], ['po', 'ใบสั่งซื้อ'], ['items', 'สินค้าและพาร์'], ['suppliers', 'ผู้จัดจำหน่าย'], ['recipes', 'สูตรจาก FoodStory']];
+const STATUS = { ok: 'ปกติ', low: 'ต้องสั่ง', out: 'ของหมด' };
+const PO_STATUS = { draft: 'ร่าง รออนุมัติ', approved: 'อนุมัติแล้ว รอรับของ', received: 'รับของแล้ว' };
+const POLICY = { daily: 'สั่งรายวัน', rop: 'จุดสั่งซื้อ' };
+
+const MAX_RECIPE_ROWS = 300;
+
+let S, tab = 'dash', branch = 1, recipeQuery = '', lastImport = null, lastSupplierImport = null;
+let itemQuery = '', itemSupplier = 'all';
+const openText = new Set();
+
+function setState(state) {
+  S = state;
+  if (!S.branches.some((b) => b.id === branch)) branch = S.branches[0]?.id;
+}
+
+const supplierOptions = (selected) => S.suppliers.map((s) =>
+  `<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+
+// สินค้าที่ผ่านตัวกรองของแท็บสินค้าและพาร์
+function visibleItems() {
+  const q = itemQuery.trim().toLowerCase();
+  return S.items.filter((it) =>
+    (itemSupplier === 'all' || String(it.supplier_id) === itemSupplier) &&
+    (!q || it.name.toLowerCase().includes(q) || it.category.toLowerCase().includes(q)));
+}
+
+function bulkSupplier() {
+  const supplier = find('suppliers', +document.getElementById('bulkSupplier').value);
+  const ids = visibleItems().map((it) => it.id);
+  if (!ids.length) return alert('ไม่มีรายการที่แสดงอยู่');
+  if (!confirm(`กำหนด "${supplier.name}" ให้สินค้า ${ids.length} รายการที่แสดงอยู่?`)) return;
+  act('/api/items/supplier', { ids, supplier_id: supplier.id });
+}
+
+const branchSeg = () => `<div class="seg">${S.branches.map((b) =>
+  `<button class="${b.id === branch ? 'on' : ''}" onclick="branch=${b.id};render()">${esc(b.name)}</button>`).join('')}</div>`;
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = (n) => Number(n).toLocaleString('th-TH', { maximumFractionDigits: 1 });
+const baht = (n) => Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท';
+const find = (list, id) => S[list].find((x) => x.id === id);
+const thaiDate = (d) => new Date(d + 'T00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+async function api(url, body) {
+  const res = await fetch(url, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error);
+  return data;
+}
+
+async function act(url, body) {
+  try {
+    setState(await api(url, body || {}));
+    render();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function go(t) { tab = t; render(); }
+
+function render() {
+  document.getElementById('nav').innerHTML = TABS.map(([id, label]) =>
+    `<button class="${id === tab ? 'on' : ''}" onclick="go('${id}')">${label}</button>`).join('');
+  document.getElementById('view').innerHTML = VIEWS[tab]();
+}
+
+const table = (head, body) => `<div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+const poTotal = (p) => p.lines.reduce((sum, l) => sum + l.qty * l.price, 0);
+
+const VIEWS = {
+  dash() {
+    const price = (r) => find('items', r.item_id).price;
+    const count = (st) => S.rows.filter((r) => r.status === st).length;
+    const value = (rows) => rows.reduce((sum, r) => sum + Math.max(0, r.on_hand) * price(r), 0);
+    const poCount = (st) => S.pos.filter((p) => p.status === st).length;
+    const urgent = S.rows.filter((r) => r.need > 0).sort((a, b) => (a.cover_days ?? 0) - (b.cover_days ?? 0)).slice(0, 10);
+
+    return `
+      <div class="cards">
+        <div class="card"><b>${count('out')}</b><span>รายการของหมด</span></div>
+        <div class="card"><b>${S.rows.filter((r) => r.need > 0).length}</b><span>รายการที่ต้องสั่ง</span></div>
+        <div class="card"><b>${poCount('draft')}</b><span>ใบสั่งซื้อรออนุมัติ</span></div>
+        <div class="card"><b>${poCount('approved')}</b><span>ใบสั่งซื้อรอรับของ</span></div>
+        <div class="card"><b>${baht(value(S.rows))}</b><span>มูลค่าสต็อกรวม</span></div>
+      </div>
+      <h2>สรุปรายสาขา</h2>
+      <div class="panel">${table(
+        '<th>สาขา</th><th class="n">ของหมด</th><th class="n">ต้องสั่ง</th><th class="n">มูลค่าสต็อก</th>',
+        S.branches.map((b) => {
+          const rows = S.rows.filter((r) => r.branch_id === b.id);
+          return `<tr><td>${esc(b.name)}</td><td class="n">${rows.filter((r) => r.status === 'out').length}</td>
+            <td class="n">${rows.filter((r) => r.need > 0).length}</td><td class="n">${baht(value(rows))}</td></tr>`;
+        }).join(''))}</div>
+      <h2>เร่งด่วนที่สุด 10 รายการ</h2>
+      <div class="panel">${urgent.length ? table(
+        '<th>สาขา</th><th>สินค้า</th><th class="n">คงเหลือ</th><th class="n">พอใช้อีก (วัน)</th><th>สถานะ</th>',
+        urgent.map((r) => {
+          const it = find('items', r.item_id);
+          return `<tr><td>${esc(find('branches', r.branch_id).name)}</td><td>${esc(it.name)}</td>
+            <td class="n">${fmt(r.on_hand)} ${esc(it.unit)}</td><td class="n">${r.cover_days == null ? '-' : fmt(r.cover_days)}</td>
+            <td><span class="tag ${r.status}">${STATUS[r.status]}</span></td></tr>`;
+        }).join('')) : '<div class="empty">ไม่มีรายการที่ต้องสั่ง</div>'}</div>`;
+  },
+
+  count() {
+    const rows = S.rows.filter((r) => r.branch_id === branch);
+    return `
+      <div class="bar">
+        ${branchSeg()}
+        <small>กรอกเฉพาะรายการที่นับ ส่วนต่างจากยอดในระบบจะบันทึกเป็นยอดใช้ของวันนี้</small>
+      </div>
+      <div class="panel">${table(
+        '<th>สินค้า</th><th>หมวด</th><th class="n">ยอดในระบบ</th><th class="n">นับได้จริง</th><th class="n">ของเสีย</th>',
+        rows.map((r) => {
+          const it = find('items', r.item_id);
+          return `<tr><td>${esc(it.name)}</td><td>${esc(it.category)}</td><td class="n">${fmt(r.on_hand)} ${esc(it.unit)}</td>
+            <td class="n"><input type="number" min="0" step="0.1" data-count="${it.id}"></td>
+            <td class="n"><input type="number" min="0" step="0.1" data-waste="${it.id}"></td></tr>`;
+        }).join(''))}
+        <div class="foot"><button class="btn" onclick="saveCount()">บันทึกการนับ</button></div>
+      </div>`;
+  },
+
+  suggest() {
+    const needs = S.rows.filter((r) => r.need > 0);
+    if (!needs.length) return '<div class="panel"><div class="empty">ตอนนี้ไม่มีรายการที่ต้องสั่ง</div></div>';
+    const total = needs.reduce((sum, r) => sum + r.need * find('items', r.item_id).price, 0);
+    return `
+      <div class="bar">
+        <button class="btn" onclick="generate()">สร้างร่างใบสั่งซื้อ</button>
+        <small>${needs.length} รายการ รวมประมาณ ${baht(total)}</small>
+      </div>
+      ${S.suppliers.map((s) => {
+        const mine = needs.filter((r) => find('items', r.item_id).supplier_id === s.id);
+        if (!mine.length) return '';
+        return `<div class="panel">
+          <div class="head"><b>${esc(s.name)}</b><small>ส่งของใน ${s.lead_days} วัน</small></div>
+          ${table(
+            '<th>สาขา</th><th>สินค้า</th><th class="n">คงเหลือ</th><th class="n">ใช้เฉลี่ย/วัน</th><th class="n">พอใช้อีก (วัน)</th><th class="n">พาร์</th><th class="n">แนะนำสั่ง</th><th class="n">มูลค่า</th>',
+            mine.map((r) => {
+              const it = find('items', r.item_id);
+              return `<tr><td>${esc(find('branches', r.branch_id).name)}</td><td>${esc(it.name)}</td>
+                <td class="n">${fmt(r.on_hand)}</td><td class="n">${fmt(r.avg_use)}</td>
+                <td class="n">${r.cover_days == null ? '-' : fmt(r.cover_days)}</td><td class="n">${fmt(r.par)}</td>
+                <td class="n"><b>${fmt(r.need)}</b> ${esc(it.unit)}</td><td class="n">${baht(r.need * it.price)}</td></tr>`;
+            }).join(''))}
+        </div>`;
+      }).join('')}`;
+  },
+
+  po() {
+    if (!S.pos.length) return '<div class="panel"><div class="empty">ยังไม่มีใบสั่งซื้อ ไปที่แท็บ "แนะนำสั่งซื้อ" เพื่อสร้างร่าง</div></div>';
+    return S.pos.map((p) => {
+      const s = find('suppliers', p.supplier_id);
+      const qtyCell = (l) => {
+        if (p.status === 'draft') return `<input type="number" min="0" value="${l.qty}" onchange="act('/api/po/line',{id:${l.id},qty:+this.value})">`;
+        if (p.status === 'approved') return `${fmt(l.qty)}</td><td class="n"><input type="number" min="0" step="0.1" value="${l.qty}" data-recv="${p.id}" data-line="${l.id}">`;
+        return `${fmt(l.qty)}</td><td class="n ${l.received_qty !== l.qty ? 'diff' : ''}">${fmt(l.received_qty ?? 0)}`;
+      };
+      const buttons = {
+        draft: `<button class="btn" onclick="act('/api/po/approve',{id:${p.id}})">อนุมัติ</button>`,
+        approved: `<button class="btn ghost" onclick="toggleText(${p.id})">ข้อความสั่งซื้อ</button>
+          <button class="btn" onclick="receive(${p.id})">บันทึกรับของ</button>`,
+        received: '',
+      }[p.status];
+      return `<div class="panel">
+        <div class="head">
+          <div><b>PO-${p.id} ${esc(s.name)}</b> <span class="tag ${p.status === 'draft' ? 'low' : ''}">${PO_STATUS[p.status]}</span></div>
+          <small>สั่ง ${thaiDate(p.created)} · กำหนดส่ง ${thaiDate(p.deliver_date)} · รวม ${baht(poTotal(p))}</small>
+        </div>
+        ${table(
+          `<th>สาขา</th><th>สินค้า</th><th class="n">จำนวนสั่ง</th>${p.status === 'draft' ? '' : '<th class="n">รับจริง</th>'}<th class="n">ราคา/หน่วย</th><th class="n">รวม</th>`,
+          p.lines.map((l) => {
+            const it = find('items', l.item_id);
+            return `<tr><td>${esc(find('branches', l.branch_id).name)}</td><td>${esc(it.name)} (${esc(it.unit)})</td>
+              <td class="n">${qtyCell(l)}</td><td class="n">${fmt(l.price)}</td><td class="n">${baht(l.qty * l.price)}</td></tr>`;
+          }).join(''))}
+        ${openText.has(p.id) ? `<textarea readonly onclick="this.select()">${esc(poText(p))}</textarea>` : ''}
+        ${buttons ? `<div class="foot">${buttons}</div>` : ''}
+      </div>`;
+    }).join('');
+  },
+
+  items() {
+    const list = visibleItems();
+    const countOf = (id) => S.items.filter((it) => it.supplier_id === id).length;
+    return `
+      <div class="bar">
+        <input type="search" placeholder="ค้นหาชื่อหรือหมวด แล้วกด Enter" value="${esc(itemQuery)}" onchange="itemQuery=this.value;render()">
+        <select onchange="itemSupplier=this.value;render()">
+          <option value="all">ผู้จัดจำหน่ายทั้งหมด</option>
+          ${S.suppliers.filter((s) => countOf(s.id)).map((s) =>
+            `<option value="${s.id}" ${String(s.id) === itemSupplier ? 'selected' : ''}>${esc(s.name)} (${countOf(s.id)})</option>`).join('')}
+        </select>
+        <small>แสดง ${list.length} จาก ${S.items.length} รายการ</small>
+      </div>
+      <div class="bar">
+        <select id="bulkSupplier">${supplierOptions()}</select>
+        <button class="btn ghost" onclick="bulkSupplier()">กำหนดผู้จัดจำหน่ายให้ ${list.length} รายการที่แสดงอยู่</button>
+      </div>
+      <div class="bar"><small>พาร์คือระดับสต็อกที่ต้องการให้มีหลังของมาส่ง ทุกช่องแก้ไขได้ ระบบบันทึกทันที</small></div>
+      <div class="panel">${table(
+        `<th>สินค้า</th><th>หมวด</th><th>วิธีสั่ง</th><th>ผู้จัดจำหน่าย</th><th class="n">สั่งทีละ</th><th class="n">ราคา</th>
+         ${S.branches.map((b) => `<th class="n">พาร์ ${esc(b.name)}</th>`).join('')}`,
+        list.map((it) => `<tr><td>${esc(it.name)}</td><td>${esc(it.category)}</td>
+          <td><select onchange="act('/api/item',{id:${it.id},policy:this.value})">${Object.entries(POLICY).map(([value, label]) =>
+            `<option value="${value}" ${value === it.policy ? 'selected' : ''}>${label}</option>`).join('')}</select></td>
+          <td><select onchange="act('/api/item',{id:${it.id},supplier_id:+this.value})">${supplierOptions(it.supplier_id)}</select></td>
+          <td class="n"><input type="number" min="0" step="any" value="${it.pack}" onchange="act('/api/item',{id:${it.id},pack:+this.value})"> ${esc(it.unit)}</td>
+          <td class="n">${fmt(it.price)}</td>
+          ${S.branches.map((b) => {
+            const r = S.rows.find((x) => x.branch_id === b.id && x.item_id === it.id);
+            return `<td class="n"><input type="number" min="0" value="${r.par}" onchange="act('/api/par',{branch_id:${b.id},item_id:${it.id},par_qty:+this.value})"></td>`;
+          }).join('')}</tr>`).join(''))}</div>`;
+  },
+
+  suppliers() {
+    const itemCount = (id) => S.items.filter((it) => it.supplier_id === id).length;
+    return `
+      <div class="panel">
+        <div class="head"><b>นำเข้าผู้จัดจำหน่าย</b><small>คัดลอกตารางผู้จัดจำหน่ายจากหน้าเว็บ FoodStory มาวาง รายที่ชื่อตรงกันจะถูกอัปเดต</small></div>
+        <textarea id="supplierText" placeholder="วางข้อความที่คัดลอกมาที่นี่"></textarea>
+        <div class="foot"><button class="btn" onclick="importSuppliers()">นำเข้า</button></div>
+        ${lastSupplierImport ? `<div class="empty">อ่านได้ ${lastSupplierImport.total} ราย: เพิ่มใหม่ ${lastSupplierImport.added} อัปเดต ${lastSupplierImport.updated}</div>` : ''}
+      </div>
+      <div class="bar"><small>${S.suppliers.length} ราย ระยะส่งของใช้คำนวณจุดสั่งซื้อและวันกำหนดส่ง แก้ไขได้ ระบบบันทึกทันที</small></div>
+      <div class="panel">${table(
+        '<th>รหัส</th><th>ชื่อ</th><th>VAT</th><th class="n">เครดิต (วัน)</th><th class="n">ระยะส่งของ (วัน)</th><th class="n">รายการใน FoodStory</th><th class="n">สินค้าที่ผูกในระบบนี้</th><th>ที่อยู่</th>',
+        S.suppliers.map((s) => `<tr><td>${esc(s.code ?? '')}</td><td>${esc(s.name)}</td>
+          <td>${s.vat == null ? '' : s.vat ? 'มี' : 'ไม่มี'}</td><td class="n">${s.credit_days ?? ''}</td>
+          <td class="n"><input type="number" min="0" value="${s.lead_days}" onchange="act('/api/supplier',{id:${s.id},lead_days:+this.value})"></td>
+          <td class="n">${s.fs_item_count ?? ''}</td><td class="n">${itemCount(s.id)}</td><td>${esc(s.address ?? '')}</td></tr>`).join(''))}</div>`;
+  },
+
+  recipes() {
+    const q = recipeQuery.trim().toLowerCase();
+    const list = S.recipes.filter((r) => r.branch_id === branch &&
+      (!q || r.menu_name.toLowerCase().includes(q) || find('items', r.item_id).name.toLowerCase().includes(q)));
+    const qty = (n) => Number(n).toLocaleString('th-TH', { maximumFractionDigits: 4 });
+    return `
+      <div class="panel">
+        <div class="head"><b>นำเข้าสูตรตัดสต็อก</b><small>ไฟล์รายงาน "ส่วนผสม" (.xlsx) จาก FoodStory นำเข้าซ้ำได้ สูตรเดิมจะถูกแทนที่</small></div>
+        <div class="foot" style="justify-content:flex-start">
+          <input type="file" id="recipeFile" accept=".xlsx">
+          <button class="btn" onclick="importRecipes()">นำเข้า</button>
+        </div>
+        ${lastImport ? `<div class="empty">นำเข้าแล้ว ${lastImport.rows} แถว: ${lastImport.menus} เมนู, วัตถุดิบ ${lastImport.items} รายการ (ใหม่ ${lastImport.newItems}), ${lastImport.branches} สาขา
+          ${lastImport.unitConflicts.length ? `<br>วัตถุดิบที่หน่วยหลักไม่ตรงกันระหว่างแถว ${lastImport.unitConflicts.length} รายการ: ${lastImport.unitConflicts.map((c) => `${esc(c.item)} (${c.units.map(esc).join('/')})`).join(', ')}` : ''}</div>` : ''}
+      </div>
+      <div class="bar">
+        ${branchSeg()}
+        <input type="search" placeholder="ค้นหาเมนูหรือวัตถุดิบ แล้วกด Enter" value="${esc(recipeQuery)}" onchange="recipeQuery=this.value;render()">
+        <small>${list.length} แถว${list.length > MAX_RECIPE_ROWS ? ` แสดง ${MAX_RECIPE_ROWS} แถวแรก` : ''}</small>
+      </div>
+      <div class="panel">${list.length ? table(
+        '<th>หมวดเมนู</th><th>เมนู</th><th>รหัสเมนู</th><th>วัตถุดิบที่ตัด</th><th class="n">ปริมาณต่อ 1 ที่</th><th class="n">ต้นทุน</th>',
+        list.slice(0, MAX_RECIPE_ROWS).map((r) => {
+          const it = find('items', r.item_id);
+          return `<tr><td>${esc(r.menu_category || '')}</td><td>${esc(r.menu_name)}</td><td>${esc(r.menu_code || '')}</td>
+            <td>${esc(it.name)}</td><td class="n ${r.unit !== it.unit ? 'diff' : ''}">${qty(r.qty)} ${esc(r.unit)}</td>
+            <td class="n">${r.unit === it.unit ? fmt(r.qty * it.price) : '-'}</td></tr>`;
+        }).join('')) : '<div class="empty">ยังไม่มีสูตรของสาขานี้</div>'}</div>`;
+  },
+};
+
+// ข้อความสำหรับส่งให้ซัพพลายเออร์ แยกจุดส่งตามสาขา
+function poText(p) {
+  const s = find('suppliers', p.supplier_id);
+  const parts = [`ใบสั่งซื้อ PO-${p.id}`, `ถึง: ${s.name}`, `กำหนดส่ง: ${thaiDate(p.deliver_date)}`];
+  for (const b of S.branches) {
+    const lines = p.lines.filter((l) => l.branch_id === b.id);
+    if (!lines.length) continue;
+    parts.push('', `[${b.name}]`);
+    for (const l of lines) {
+      const it = find('items', l.item_id);
+      parts.push(`- ${it.name} ${fmt(l.qty)} ${it.unit}`);
+    }
+  }
+  parts.push('', `รวม ${baht(poTotal(p))}`);
+  return parts.join('\n');
+}
+
+function toggleText(id) {
+  openText.has(id) ? openText.delete(id) : openText.add(id);
+  render();
+}
+
+function saveCount() {
+  const lines = [];
+  for (const input of document.querySelectorAll('[data-count]')) {
+    const item_id = +input.dataset.count;
+    const wasteInput = document.querySelector(`[data-waste="${item_id}"]`);
+    const waste = +wasteInput.value || 0;
+    if (input.value === '' && !waste) continue;
+    const row = S.rows.find((r) => r.branch_id === branch && r.item_id === item_id);
+    // กรอกแต่ของเสีย ไม่ได้นับ: ถือว่ายอดที่เหลือตรงกับระบบ
+    const counted = input.value === '' ? row.on_hand - waste : +input.value;
+    lines.push({ item_id, counted, waste });
+  }
+  if (!lines.length) return alert('ยังไม่ได้กรอกจำนวน');
+  act('/api/count', { branch_id: branch, lines });
+}
+
+async function generate() {
+  await act('/api/po/generate');
+  go('po');
+}
+
+function receive(id) {
+  const lines = [...document.querySelectorAll(`[data-recv="${id}"]`)].map((input) => ({
+    id: +input.dataset.line,
+    received_qty: +input.value || 0,
+  }));
+  act('/api/po/receive', { id, lines });
+}
+
+async function importSuppliers() {
+  const text = document.getElementById('supplierText').value;
+  if (!text.trim()) return alert('วางข้อความก่อน');
+  try {
+    const data = await api('/api/import/suppliers', { text });
+    lastSupplierImport = data.result;
+    setState(data);
+    render();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function importRecipes() {
+  const file = document.getElementById('recipeFile').files[0];
+  if (!file) return alert('เลือกไฟล์ก่อน');
+  const res = await fetch('/api/import/recipes', { method: 'POST', body: file });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  lastImport = data.result;
+  setState(data);
+  render();
+}
+
+api('/api/state').then((state) => { setState(state); render(); });
+</script>
+</body>
+</html>
