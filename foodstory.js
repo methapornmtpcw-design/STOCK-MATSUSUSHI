@@ -1,8 +1,6 @@
 // นำเข้าไฟล์ที่ส่งออกจาก FoodStory (Wongnai POS Owner)
 const { readSheet } = require('./xlsx');
-const { db } = require('./db');
-
-const UNKNOWN_SUPPLIER = 'ยังไม่ระบุซัพพลายเออร์';
+const { db, unknownSupplierId } = require('./db');
 
 const num = (s) => +String(s ?? '').replace(/,/g, '') || 0;
 const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
@@ -48,8 +46,7 @@ function importRecipes(source) {
 
   db.exec('BEGIN');
   try {
-    db.prepare('INSERT OR IGNORE INTO suppliers (name, lead_days) VALUES (?, 1)').run(UNKNOWN_SUPPLIER);
-    const supplierId = db.prepare('SELECT id FROM suppliers WHERE name = ?').get(UNKNOWN_SUPPLIER).id;
+    const supplierId = unknownSupplierId();
 
     const branchIds = new Map();
     for (const name of new Set(data.map((r) => r.branch))) {
@@ -76,7 +73,7 @@ function importRecipes(source) {
       } else {
         const { lastInsertRowid } = db
           .prepare(
-            "INSERT INTO items (name, code, category, unit, policy, supplier_id, price, pack) VALUES (?, ?, ?, ?, 'rop', ?, ?, 1)"
+            "INSERT INTO items (name, code, category, unit, policy, supplier_id, price, pack) VALUES (?, ?, ?, ?, 'weekly', ?, ?, 1)"
           )
           .run(name, code, category, unit, supplierId, price);
         itemIds.set(name, Number(lastInsertRowid));

@@ -6,68 +6,280 @@
 <title>ระบบสต็อกและจัดซื้อ</title>
 <style>
   :root {
-    --bg: #f5f4f0; --card: #fff; --ink: #1f2421; --muted: #6b716d; --line: #e3e1da;
-    --brand: #1f5f4a; --brand-soft: #e4efe9; --warn: #a15c00; --warn-soft: #fbefd9;
-    --bad: #a32a2a; --bad-soft: #f8e1e1;
+    --bg: #f3f5f7; --card: #fff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --soft: #f8fafc;
+    --side: #0f1b2d; --side-ink: #cbd5e1; --side-muted: #7c8aa0;
+    --brand: #0f766e; --brand-dark: #0b5d57; --brand-soft: #e6f4f1;
+    --warn: #b45309; --warn-soft: #fef3c7; --bad: #b91c1c; --bad-soft: #fee2e2;
+    --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .04);
+    --radius: 12px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", "Leelawadee UI", Tahoma, sans-serif; }
-  header { background: var(--brand); color: #fff; padding: 12px 16px 0; }
-  header h1 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
-  nav { display: flex; gap: 4px; overflow-x: auto; }
-  nav button { background: none; border: 0; color: #cfe3da; padding: 8px 14px; font: inherit; cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap; }
-  nav button.on { background: var(--bg); color: var(--ink); font-weight: 600; }
-  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  h2 { font-size: 16px; margin: 20px 0 8px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
-  .card b { display: block; font-size: 24px; line-height: 1.2; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14.5px/1.55 "Leelawadee UI", "Segoe UI", Tahoma, sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  /* โครงหน้า */
+  .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100%; }
+  .side { background: var(--side); color: var(--side-ink); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 20px 18px 18px; border-bottom: 1px solid rgba(255, 255, 255, .07); }
+  .brand .logo { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #14b8a6, #0f766e); display: grid; place-items: center; color: #fff; flex: none; }
+  .brand b { display: block; color: #fff; font-size: 15px; line-height: 1.25; }
+  .brand small { color: var(--side-muted); font-size: 12px; }
+  nav { padding: 10px 10px 16px; overflow-y: auto; flex: 1; }
+  nav .group { padding: 14px 10px 6px; font-size: 11px; letter-spacing: .06em; color: var(--side-muted); text-transform: uppercase; }
+  nav button { width: 100%; display: flex; align-items: center; gap: 11px; background: none; border: 0; color: var(--side-ink); padding: 9px 10px; border-radius: 8px; cursor: pointer; text-align: left; }
+  nav button:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+  nav button.on { background: rgba(20, 184, 166, .16); color: #fff; font-weight: 600; }
+  nav button.on svg { color: #5eead4; }
+  nav svg, .logo svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  nav .count { margin-left: auto; min-width: 22px; padding: 0 7px; border-radius: 99px; background: #f59e0b; color: #1f2937; font-size: 12px; font-weight: 700; text-align: center; }
+  .side-foot a { color: #5eead4; }
+  .alert { background: var(--bad-soft); border: 1px solid #fca5a5; color: var(--bad); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-weight: 600; }
+  .side-foot { padding: 14px 18px; border-top: 1px solid rgba(255, 255, 255, .07); font-size: 12px; color: var(--side-muted); }
+
+  .main { min-width: 0; display: flex; flex-direction: column; }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 22px 28px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+  .top h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
+  .top p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+  .top .meta { color: var(--muted); font-size: 13px; text-align: right; }
+  .top .meta b { display: block; color: var(--ink); font-size: 14px; }
+  main { padding: 22px 28px 40px; max-width: 1500px; width: 100%; }
+  h2 { font-size: 14px; margin: 26px 0 10px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+
+  /* การ์ดสรุป */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); border-top: 3px solid var(--brand); }
+  .card.bad { border-top-color: var(--bad); }
+  .card.warn { border-top-color: #f59e0b; }
+  .card.plain { border-top-color: #94a3b8; }
   .card span { color: var(--muted); font-size: 13px; }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
-  .panel > .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .card b { display: block; font-size: 27px; line-height: 1.25; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+  /* กล่องเนื้อหาและตาราง */
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow); }
+  .panel > .head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--line); background: var(--soft); }
+  .panel > .head b { font-size: 15px; }
   .panel > .head small { color: var(--muted); }
-  .scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  th { font-size: 13px; color: var(--muted); font-weight: 600; background: #faf9f6; }
+  .scroll { overflow: auto; max-height: max(360px, calc(100vh - 250px)); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  th, td { padding: 9px 16px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { position: sticky; top: 0; z-index: 1; font-size: 12px; color: var(--muted); font-weight: 600; background: var(--soft); letter-spacing: .02em; }
+  tbody tr:hover td { background: #f8fbfb; }
   tr:last-child td { border-bottom: 0; }
   td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
-  .tag { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; background: var(--brand-soft); color: var(--brand); }
+  .empty { color: var(--muted); padding: 22px 18px; }
+  .foot { padding: 12px 18px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; border-top: 1px solid var(--line); background: var(--soft); }
+
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--brand-soft); color: var(--brand-dark); }
   .tag.low { background: var(--warn-soft); color: var(--warn); }
   .tag.out { background: var(--bad-soft); color: var(--bad); }
-  .diff { color: var(--bad); font-weight: 600; }
-  button.btn { background: var(--brand); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer; }
-  button.btn.ghost { background: none; color: var(--brand); border: 1px solid var(--brand); }
-  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .seg button { background: var(--card); border: 1px solid var(--line); padding: 6px 12px; font: inherit; cursor: pointer; }
-  .seg button:first-child { border-radius: 8px 0 0 8px; }
-  .seg button:last-child { border-radius: 0 8px 8px 0; }
-  .seg button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
-  input[type=number] { width: 84px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; text-align: right; }
-  select { max-width: 260px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--card); }
-  input[type=search] { min-width: 260px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-  textarea { width: 100%; min-height: 180px; border: 0; border-top: 1px solid var(--line); padding: 12px 14px; font: 13px/1.5 Consolas, monospace; resize: vertical; }
-  .empty { color: var(--muted); padding: 18px 14px; }
-  .foot { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--line); }
+  .diff { color: var(--bad); font-weight: 700; }
+
+  /* ปุ่มและช่องกรอก */
+  button.btn { background: var(--brand); color: #fff; border: 1px solid var(--brand); border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; transition: background .12s; }
+  button.btn:hover { background: var(--brand-dark); }
+  button.btn.ghost { background: var(--card); color: var(--brand-dark); border-color: #99d5cd; }
+  button.btn.ghost:hover { background: var(--brand-soft); }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .bar small { color: var(--muted); }
+  .seg { display: inline-flex; background: #e8edf2; padding: 3px; border-radius: 10px; gap: 2px; flex-wrap: wrap; }
+  .seg button { background: none; border: 0; padding: 6px 14px; border-radius: 8px; cursor: pointer; color: var(--muted); }
+  .seg button.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: var(--shadow); }
+  input[type=number], input[type=search], select, textarea { border: 1px solid #cbd5e1; border-radius: 8px; background: var(--card); transition: border-color .12s, box-shadow .12s; }
+  input[type=number]:focus, input[type=search]:focus, select:focus, textarea:focus { outline: 0; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(15, 118, 110, .15); }
+  input[type=number] { width: 88px; padding: 5px 8px; text-align: right; font-variant-numeric: tabular-nums; }
+  input[type=search] { min-width: 280px; padding: 7px 12px; }
+  select { max-width: 260px; padding: 6px 8px; }
+  textarea { display: block; width: 100%; min-height: 170px; border-width: 0 0 1px; border-radius: 0; padding: 14px 18px; font: 13px/1.55 Consolas, monospace; resize: vertical; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chips button { border: 1px solid #cbd5e1; background: var(--card); border-radius: 99px; padding: 5px 13px; cursor: pointer; color: var(--muted); }
+  .chips button:hover { border-color: var(--brand); color: var(--brand-dark); }
+  .chips button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+  tr.grp td { background: #eef2f6; font-weight: 700; color: var(--ink); }
+  tr.grp small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+  tbody tr.grp:hover td { background: #eef2f6; }
+  button.pick { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #cbd5e1; background: var(--card); border-radius: 8px; padding: 5px 10px; cursor: pointer; max-width: 320px; }
+  button.pick:hover { border-color: var(--brand); }
+  button.pick span.name { overflow: hidden; text-overflow: ellipsis; }
+  label.check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  dialog { border: 0; border-radius: 14px; padding: 0; width: min(580px, 92vw); box-shadow: 0 24px 60px rgba(15, 23, 42, .35); color: var(--ink); }
+  dialog::backdrop { background: rgba(15, 23, 42, .5); }
+  .dlg-head { padding: 18px 20px 12px; }
+  .dlg-head b { display: block; font-size: 16px; }
+  .dlg-head small { color: var(--muted); }
+  dialog input[type=search] { display: block; margin: 0 20px 12px; width: calc(100% - 40px); min-width: 0; }
+  .dlg-list { max-height: 48vh; overflow: auto; border-top: 1px solid var(--line); }
+  .dlg-list label { display: flex; align-items: center; gap: 10px; padding: 9px 20px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .dlg-list label:hover { background: var(--soft); }
+  .dlg-list span.name { flex: 1; }
+  .dlg-list .prim { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 13px; }
+
+  /* หน้าแนะนำสั่งซื้อ */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .steps div { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 11px 14px; color: var(--muted); }
+  .steps i { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand-dark); font-style: normal; font-weight: 700; }
+  .steps b { display: block; color: var(--ink); font-size: 14px; line-height: 1.3; }
+  .steps small { font-size: 12.5px; }
+  .note { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; background: var(--brand-soft); border: 1px solid #bfe3dc; border-radius: var(--radius); padding: 11px 16px; margin: 16px 0; color: var(--brand-dark); }
+  .note .pill { background: var(--card); border: 1px solid #bfe3dc; border-radius: 8px; padding: 2px 10px; font-weight: 600; }
+  .note .op { font-weight: 700; }
+  td .sub { display: block; color: var(--muted); font-size: 12.5px; }
+  .trend { font-size: 12px; font-weight: 600; margin-left: 6px; color: var(--muted); }
+  .trend.up { color: var(--bad); }
+  .trend.down { color: var(--brand-dark); }
+  .stepper { display: inline-flex; align-items: center; }
+  .stepper button { width: 30px; height: 32px; border: 1px solid #cbd5e1; background: var(--soft); cursor: pointer; font-size: 16px; line-height: 1; color: var(--ink); }
+  .stepper button:hover { background: var(--brand-soft); border-color: var(--brand); }
+  .stepper button:first-child { border-radius: 8px 0 0 8px; }
+  .stepper button:last-of-type { border-radius: 0 8px 8px 0; }
+  .stepper input[type=number] { width: 78px; height: 32px; border-radius: 0; border-left: 0; border-right: 0; text-align: center; font-weight: 600; -moz-appearance: textfield; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper .unit { margin-left: 8px; color: var(--muted); min-width: 64px; text-align: left; }
+  tr.edited td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+  tr.edited .stepper input[type=number] { background: var(--warn-soft); border-color: #f59e0b; }
+  .panel > .head .sum { text-align: right; }
+  .panel > .head .sum b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .orderbar { position: sticky; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding: 14px 20px; background: var(--side); color: #fff; border-radius: var(--radius); box-shadow: 0 -4px 20px rgba(15, 23, 42, .18); }
+  .orderbar small { color: var(--side-ink); display: block; }
+  .orderbar b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .orderbar .actions { display: flex; gap: 10px; align-items: center; }
+  .orderbar .btn.ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+  .orderbar .btn.ghost:hover { background: rgba(255, 255, 255, .1); }
+  .orderbar .btn.big { background: #14b8a6; border-color: #14b8a6; padding: 10px 22px; font-size: 15px; }
+  .orderbar .btn.big:hover { background: #0d9488; }
+  @media (max-width: 900px) { .steps { grid-template-columns: 1fr; } }
+
+  td select { max-width: 210px; }
+  /* ตารางสั่งซื้อมีหลายคอลัมน์: บีบระยะและให้ชื่อสินค้าขึ้นบรรทัดใหม่ได้ เพื่อให้เห็นครบโดยไม่ต้องเลื่อนข้าง */
+  .order th, .order td { padding: 8px 7px; }
+  .order td:first-child, .order th:first-child { padding-left: 18px; }
+  .order td:last-child, .order th:last-child { padding-right: 18px; }
+  .order td:first-child { white-space: normal; min-width: 150px; }
+  .order td select { max-width: 138px; }
+  .order .stepper input[type=number] { width: 58px; }
+  .order input.price { width: 84px; }
+  .order .trend { display: block; margin-left: 0; }
+  input.mini { width: 62px; padding: 3px 6px; }
+  input.price { width: 96px; }
+
+  /* ตัวอย่างเอกสารใบสั่งซื้อ */
+  dialog#doc { width: min(900px, 96vw); max-height: 94vh; background: #e9edf2; }
+  .doc-actions { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 18px; background: var(--side); color: #fff; }
+  .doc-actions .btn.ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+  .sheet { background: #fff; color: #111; margin: 18px auto; padding: 14mm 14mm 12mm; width: min(210mm, calc(100% - 36px)); min-height: 270mm; box-shadow: 0 2px 12px rgba(15, 23, 42, .18); font-size: 13px; line-height: 1.5; display: flex; flex-direction: column; }
+  .sheet .doc-top { display: flex; justify-content: space-between; gap: 20px; border-bottom: 3px solid var(--brand); padding-bottom: 12px; }
+  .sheet .company b { font-size: 17px; display: block; }
+  .sheet .doc-title { text-align: right; flex: none; }
+  .sheet .doc-title h3 { margin: 0; font-size: 22px; color: var(--brand-dark); line-height: 1.2; }
+  .sheet .doc-title span { letter-spacing: .12em; font-size: 11px; color: #555; }
+  .sheet .doc-meta { margin-top: 8px; border-collapse: collapse; margin-left: auto; width: auto; }
+  .sheet .doc-meta td { border: 0; padding: 1px 0 1px 14px; white-space: nowrap; text-align: right; }
+  .sheet .doc-meta td:first-child { color: #555; }
+  .sheet .doc-meta .no { font-size: 15px; font-weight: 700; }
+  .sheet .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .sheet .party { border: 1px solid #cfd6de; border-radius: 6px; padding: 9px 12px; }
+  .sheet .party h4 { margin: 0 0 3px; font-size: 11px; letter-spacing: .05em; color: var(--brand-dark); }
+  .sheet .party b { display: block; font-size: 14px; }
+  .sheet .muted { color: #555; }
+  .sheet table.lines { border-collapse: collapse; width: 100%; }
+  .sheet table.lines th { position: static; background: var(--brand); color: #fff; font-size: 12px; padding: 7px 8px; border: 0; }
+  .sheet table.lines td { padding: 6px 8px; border-bottom: 1px solid #e2e6ea; white-space: normal; vertical-align: top; }
+  .sheet table.lines td.n, .sheet table.lines th.n { white-space: nowrap; }
+  .sheet table.lines tbody tr:hover td { background: none; }
+  .sheet tbody tr:hover td { background: none; }
+  .sheet .doc-bottom { display: grid; grid-template-columns: 1fr 250px; gap: 18px; margin-top: 12px; align-items: start; }
+  .sheet .words { border: 1px solid #cfd6de; border-radius: 6px; padding: 8px 12px; }
+  .sheet .totals { border-collapse: collapse; width: 100%; }
+  .sheet .totals td { border: 0; padding: 4px 0; white-space: nowrap; }
+  .sheet .totals td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .sheet .totals tr.grand td { border-top: 2px solid #111; font-weight: 700; font-size: 15px; padding-top: 7px; }
+  .sheet .signs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: auto; padding-top: 34px; text-align: center; }
+  .sheet .sign .ink { height: 56px; display: flex; align-items: flex-end; justify-content: center; border-bottom: 1px dotted #555; }
+  .sheet .sign img { max-height: 54px; max-width: 100%; }
+  .sheet .sign small { display: block; color: #555; }
+  .sheet .draft-mark { color: var(--warn); font-weight: 700; }
+  .form-grid { display: grid; grid-template-columns: 160px 1fr; gap: 10px 14px; align-items: center; padding: 16px 18px; }
+  .form-grid input[type=text], .form-grid textarea, td input[type=text] { border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; width: 100%; background: var(--card); }
+  .form-grid textarea { min-height: 64px; font: inherit; border-width: 1px; border-radius: 8px; }
+  td input[type=text] { min-width: 150px; }
+  .sig-preview { max-height: 60px; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 4px 10px; background: #fff; }
+  @media print {
+    .app, #toast, .doc-actions { display: none !important; }
+    body { background: #fff; }
+    dialog#doc { position: static; width: auto; max-width: none; max-height: none; box-shadow: none; background: #fff; overflow: visible; }
+    dialog#doc::backdrop { display: none; }
+    .sheet { margin: 0; width: auto; min-height: 0; box-shadow: none; padding: 0; }
+    @page { size: A4; margin: 14mm; }
+  }
+
+  #toast { position: fixed; right: 22px; bottom: 22px; display: grid; gap: 8px; z-index: 10; }
+  #toast div { background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(15, 23, 42, .25); font-size: 14px; max-width: 420px; }
+  #toast div.bad { background: var(--bad); }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .side { position: static; height: auto; }
+    .brand { padding: 12px 16px; }
+    nav { display: flex; gap: 4px; padding: 8px 10px; overflow-x: auto; }
+    nav .group, .side-foot { display: none; }
+    nav button { width: auto; white-space: nowrap; }
+    .top, main { padding-left: 16px; padding-right: 16px; }
+    input[type=search] { min-width: 0; flex: 1; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>สต็อกและจัดซื้อ</h1>
-  <nav id="nav"></nav>
-</header>
-<main id="view"></main>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
+      <div><b>Stock &amp; Purchasing</b><small>ระบบสต็อกและจัดซื้อ</small></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div><h1 id="title"></h1><p id="subtitle"></p></div>
+      <div class="meta" id="meta"></div>
+    </header>
+    <main id="view"></main>
+  </div>
+</div>
+<div id="toast"></div>
+<dialog id="dlg"></dialog>
+<dialog id="doc"></dialog>
 
 <script>
-const TABS = [['dash', 'ภาพรวม'], ['count', 'นับสต็อก'], ['suggest', 'แนะนำสั่งซื้อ'], ['po', 'ใบสั่งซื้อ'], ['items', 'สินค้าและพาร์'], ['suppliers', 'ผู้จัดจำหน่าย'], ['recipes', 'สูตรจาก FoodStory']];
+const TABS = [
+  { group: 'งานประจำวัน' },
+  { id: 'dash', label: 'ภาพรวม', hint: 'สถานะสต็อกและงานจัดซื้อของทุกสาขา', icon: '<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>' },
+  { id: 'count', label: 'นับสต็อก', hint: 'บันทึกยอดนับจริงและของเสียรายสาขา', icon: '<path d="M9 4h6v3H9zM7 5H5v15h14V5h-2M9 12l2 2 4-4"/>' },
+  { id: 'suggest', label: 'แนะนำสั่งซื้อ', hint: 'รายการที่ระบบคำนวณว่าควรสั่ง แยกตามผู้จัดจำหน่าย', icon: '<path d="M12 3v3M5.6 5.6l2.1 2.1M3 12h3M18 12h3M16.3 7.7l2.1-2.1M9 18h6M10 21h4M8 15a5 5 0 1 1 8 0"/>' },
+  { id: 'po', label: 'ใบสั่งซื้อ', hint: 'อนุมัติ ส่งคำสั่งซื้อ และตรวจรับของ', icon: '<path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/>' },
+  { group: 'ข้อมูลหลัก' },
+  { id: 'items', label: 'สินค้าและพาร์', hint: 'ผู้จัดจำหน่าย วิธีสั่ง และระดับพาร์ของวัตถุดิบ', icon: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>' },
+  { id: 'suppliers', label: 'ผู้จัดจำหน่าย', hint: 'รายชื่อและระยะเวลาส่งของ', icon: '<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>' },
+  { id: 'settings', label: 'ตั้งค่าเอกสาร', hint: 'ข้อมูลผู้สั่งซื้อ ภาษีมูลค่าเพิ่ม และลายเซ็นบนใบสั่งซื้อ', icon: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4"/>' },
+  { id: 'recipes', label: 'สูตรจาก FoodStory', hint: 'สูตรตัดสต็อกของแต่ละเมนู', icon: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11M9 8h6"/>' },
+];
 const STATUS = { ok: 'ปกติ', low: 'ต้องสั่ง', out: 'ของหมด' };
 const PO_STATUS = { draft: 'ร่าง รออนุมัติ', approved: 'อนุมัติแล้ว รอรับของ', received: 'รับของแล้ว' };
-const POLICY = { daily: 'สั่งรายวัน', rop: 'จุดสั่งซื้อ' };
+const POLICY = { weekly: 'สั่งรายสัปดาห์', daily: 'สั่งรายวัน', rop: 'จุดสั่งซื้อ' };
 
 const MAX_RECIPE_ROWS = 300;
 
 let S, tab = 'dash', branch = 1, recipeQuery = '', lastImport = null, lastSupplierImport = null;
 let itemQuery = '', itemSupplier = 'all';
+let countQuery = '', countCatKeys = [];
+let showAllSuggest = false, suggestBranch = 'all', suggestQuery = '';
+const suggestDraft = {}; // จำนวนสั่งที่แก้ในหน้าแนะนำสั่งซื้อ คีย์ "สาขา:สินค้า"
+const countCats = new Set(); // หมวดที่เลือกในหน้านับสต็อก ว่าง = ทุกหมวด
+const countDraft = {}; // ยอดที่กรอกค้างไว้ คีย์ "สาขา:สินค้า" เก็บไว้ข้ามการกรอง
 const openText = new Set();
 
 function setState(state) {
@@ -75,23 +287,93 @@ function setState(state) {
   if (!S.branches.some((b) => b.id === branch)) branch = S.branches[0]?.id;
 }
 
-const supplierOptions = (selected) => S.suppliers.map((s) =>
+const catKey = (it) => it.category.toLowerCase();
+const realSuppliers = () => S.suppliers.filter((s) => s.id !== S.unknown_supplier_id);
+const hasSupplier = (it, id) => it.supplier_id === id || it.supplier_ids.includes(id);
+
+const supplierOptions = (selected) => realSuppliers().map((s) =>
   `<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
 
 // สินค้าที่ผ่านตัวกรองของแท็บสินค้าและพาร์
 function visibleItems() {
   const q = itemQuery.trim().toLowerCase();
   return S.items.filter((it) =>
-    (itemSupplier === 'all' || String(it.supplier_id) === itemSupplier) &&
+    (itemSupplier === 'all' || hasSupplier(it, +itemSupplier)) &&
     (!q || it.name.toLowerCase().includes(q) || it.category.toLowerCase().includes(q)));
 }
 
 function bulkSupplier() {
   const supplier = find('suppliers', +document.getElementById('bulkSupplier').value);
+  const primary = document.getElementById('bulkPrimary').checked;
   const ids = visibleItems().map((it) => it.id);
-  if (!ids.length) return alert('ไม่มีรายการที่แสดงอยู่');
-  if (!confirm(`กำหนด "${supplier.name}" ให้สินค้า ${ids.length} รายการที่แสดงอยู่?`)) return;
-  act('/api/items/supplier', { ids, supplier_id: supplier.id });
+  if (!ids.length) return notify('ไม่มีรายการที่แสดงอยู่');
+  if (!confirm(`เพิ่ม "${supplier.name}" ให้สินค้า ${ids.length} รายการที่แสดงอยู่${primary ? ' และตั้งเป็นรายหลัก' : ''}?`)) return;
+  act('/api/items/supplier', { ids, supplier_id: supplier.id, primary });
+}
+
+// หน้าต่างเลือกผู้จัดจำหน่ายหลายรายของสินค้าหนึ่งรายการ
+function editSuppliers(id) {
+  const it = find('items', id);
+  const chosen = new Set(it.supplier_ids);
+  const list = [...realSuppliers()].sort((a, b) => chosen.has(b.id) - chosen.has(a.id));
+  const dlg = document.getElementById('dlg');
+  dlg.innerHTML = `
+    <div class="dlg-head"><b>ผู้จัดจำหน่ายของ ${esc(it.name)}</b>
+      <small>ติ๊กได้หลายราย แล้วเลือกรายหลักที่ใช้ออกใบสั่งซื้อ</small></div>
+    <input type="search" placeholder="ค้นหาผู้จัดจำหน่าย" oninput="filterSuppliers(this.value)">
+    <div class="dlg-list">${list.map((s) => `<label data-name="${esc(s.name.toLowerCase())}">
+      <input type="checkbox" value="${s.id}" ${chosen.has(s.id) ? 'checked' : ''} onchange="syncPrimary()">
+      <span class="name">${esc(s.name)}</span>
+      <span class="prim"><input type="radio" name="primary" value="${s.id}" ${s.id === it.supplier_id ? 'checked' : ''}> รายหลัก</span>
+    </label>`).join('')}</div>
+    <div class="foot">
+      <button class="btn ghost" onclick="document.getElementById('dlg').close()">ยกเลิก</button>
+      <button class="btn" onclick="saveSuppliers(${id})">บันทึก</button>
+    </div>`;
+  syncPrimary();
+  dlg.showModal();
+}
+
+// เลือกรายหลักได้เฉพาะรายที่ติ๊กไว้ ถ้ารายหลักถูกเอาออก ให้รายแรกที่ติ๊กเป็นรายหลักแทน
+function syncPrimary() {
+  const rows = [...document.querySelectorAll('#dlg .dlg-list label')].map((label) => ({
+    box: label.querySelector('[type=checkbox]'),
+    radio: label.querySelector('[type=radio]'),
+  }));
+  for (const r of rows) {
+    r.radio.disabled = !r.box.checked;
+    if (!r.box.checked) r.radio.checked = false;
+  }
+  const checked = rows.filter((r) => r.box.checked);
+  if (checked.length && !checked.some((r) => r.radio.checked)) checked[0].radio.checked = true;
+}
+
+function filterSuppliers(text) {
+  const q = text.trim().toLowerCase();
+  for (const label of document.querySelectorAll('#dlg .dlg-list label')) label.hidden = !label.dataset.name.includes(q);
+}
+
+function saveSuppliers(id) {
+  const dlg = document.getElementById('dlg');
+  const supplier_ids = [...dlg.querySelectorAll('[type=checkbox]:checked')].map((el) => +el.value);
+  const primary = dlg.querySelector('[type=radio]:checked');
+  dlg.close();
+  act('/api/item/suppliers', { id, supplier_ids, primary_id: primary ? +primary.value : null });
+}
+
+function toggleCat(index) {
+  const k = countCatKeys[index];
+  countCats.has(k) ? countCats.delete(k) : countCats.add(k);
+  render();
+}
+
+const draftedCount = () => Object.entries(countDraft)
+  .filter(([k, d]) => k.startsWith(branch + ':') && (d.c !== '' || d.w !== '')).length;
+
+function draftCount(itemId, field, value) {
+  const k = `${branch}:${itemId}`;
+  countDraft[k] = { c: '', w: '', ...countDraft[k], [field]: value };
+  document.getElementById('drafted').textContent = draftedCount();
 }
 
 const branchSeg = () => `<div class="seg">${S.branches.map((b) =>
@@ -105,26 +387,75 @@ const thaiDate = (d) => new Date(d + 'T00:00').toLocaleDateString('th-TH', { day
 
 async function api(url, body) {
   const res = await fetch(url, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+  if (res.status === 401) location.replace('/login');
   const data = await res.json();
   if (!res.ok) throw new Error(data.error);
   return data;
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.replace('/login');
+}
+
+async function restoreBackup() {
+  const file = document.getElementById('restoreFile').files[0];
+  if (!file) return notify('เลือกไฟล์สำรองก่อน');
+  if (!confirm('ข้อมูลทั้งหมดในระบบนี้จะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง ดำเนินการต่อ?')) return;
+  const res = await fetch('/api/restore', { method: 'POST', body: file });
+  const data = await res.json();
+  if (!res.ok) return notify(data.error);
+  if (!data.restarting) return notify('รับไฟล์แล้ว ปิดแล้วเปิดเซิร์ฟเวอร์ใหม่เพื่อใช้ข้อมูลที่กู้คืน', 'ok');
+  notify('กำลังเปิดระบบใหม่ด้วยข้อมูลที่กู้คืน หน้านี้จะโหลดใหม่เอง', 'ok');
+  setTimeout(() => location.reload(), 8000);
 }
 
 async function act(url, body) {
   try {
     setState(await api(url, body || {}));
     render();
+    notify('บันทึกแล้ว', 'ok');
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
   }
 }
 
 function go(t) { tab = t; render(); }
 
+let renderedTab = null;
+
 function render() {
-  document.getElementById('nav').innerHTML = TABS.map(([id, label]) =>
-    `<button class="${id === tab ? 'on' : ''}" onclick="go('${id}')">${label}</button>`).join('');
-  document.getElementById('view').innerHTML = VIEWS[tab]();
+  const badge = {
+    suggest: S.rows.filter((r) => r.need > 0).length,
+    po: S.pos.filter((p) => p.status !== 'received').length,
+  };
+  document.getElementById('nav').innerHTML = TABS.map((t) => t.group
+    ? `<div class="group">${t.group}</div>`
+    : `<button class="${t.id === tab ? 'on' : ''}" onclick="go('${t.id}')"><svg viewBox="0 0 24 24">${t.icon}</svg>${t.label}
+        ${badge[t.id] ? `<span class="count">${badge[t.id]}</span>` : ''}</button>`).join('');
+
+  const current = TABS.find((t) => t.id === tab);
+  document.getElementById('title').textContent = current.label;
+  document.getElementById('subtitle').textContent = current.hint;
+  document.getElementById('meta').innerHTML = `<b>${new Date(S.today + 'T00:00').toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</b>${S.branches.length} สาขา · วัตถุดิบ ${S.items.length} รายการ`;
+  document.getElementById('sideFoot').innerHTML = `ผู้จัดจำหน่าย ${S.suppliers.length} ราย · สูตร ${S.recipes.length} แถว${S.auth ? '<br><a href="#" onclick="logout();return false">ออกจากระบบ</a>' : ''}`;
+
+  // บันทึกแล้ววาดใหม่ในแท็บเดิม: คงตำแหน่งเลื่อนของตารางไว้
+  const view = document.getElementById('view');
+  const scrolls = renderedTab === tab ? [...view.querySelectorAll('.scroll')].map((el) => el.scrollTop) : [];
+  view.innerHTML = (S.storage_warning
+    ? '<div class="alert">ระบบออนไลน์นี้ยังไม่ได้ต่อดิสก์ถาวร (Volume) ข้อมูลจะหายเมื่อ deploy ใหม่ ต่อ Volume ในการตั้งค่าของ Railway ก่อนใช้งานจริง</div>'
+    : '') + VIEWS[tab]();
+  view.querySelectorAll('.scroll').forEach((el, i) => (el.scrollTop = scrolls[i] || 0));
+  renderedTab = tab;
+}
+
+function notify(message, tone = 'bad') {
+  const el = document.createElement('div');
+  el.className = tone;
+  el.textContent = message;
+  document.getElementById('toast').append(el);
+  setTimeout(() => el.remove(), tone === 'bad' ? 5000 : 1800);
 }
 
 const table = (head, body) => `<div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
@@ -140,11 +471,11 @@ const VIEWS = {
 
     return `
       <div class="cards">
-        <div class="card"><b>${count('out')}</b><span>รายการของหมด</span></div>
-        <div class="card"><b>${S.rows.filter((r) => r.need > 0).length}</b><span>รายการที่ต้องสั่ง</span></div>
-        <div class="card"><b>${poCount('draft')}</b><span>ใบสั่งซื้อรออนุมัติ</span></div>
-        <div class="card"><b>${poCount('approved')}</b><span>ใบสั่งซื้อรอรับของ</span></div>
-        <div class="card"><b>${baht(value(S.rows))}</b><span>มูลค่าสต็อกรวม</span></div>
+        <div class="card ${count('out') ? 'bad' : 'plain'}"><span>รายการของหมด</span><b>${count('out')}</b></div>
+        <div class="card warn"><span>รายการที่ต้องสั่ง</span><b>${S.rows.filter((r) => r.need > 0).length}</b></div>
+        <div class="card warn"><span>ใบสั่งซื้อรออนุมัติ</span><b>${poCount('draft')}</b></div>
+        <div class="card"><span>ใบสั่งซื้อรอรับของ</span><b>${poCount('approved')}</b></div>
+        <div class="card"><span>มูลค่าสต็อกรวม</span><b>${baht(value(S.rows))}</b></div>
       </div>
       <h2>สรุปรายสาขา</h2>
       <div class="panel">${table(
@@ -166,57 +497,161 @@ const VIEWS = {
   },
 
   count() {
-    const rows = S.rows.filter((r) => r.branch_id === branch);
+    const cats = new Map();
+    for (const it of S.items) {
+      const c = cats.get(catKey(it)) || { label: it.category, n: 0 };
+      c.n++;
+      cats.set(catKey(it), c);
+    }
+    countCatKeys = [...cats.keys()].sort((a, b) => a.localeCompare(b, 'th'));
+    const q = countQuery.trim().toLowerCase();
+    const list = S.items
+      .filter((it) => (!countCats.size || countCats.has(catKey(it))) && (!q || it.name.toLowerCase().includes(q)))
+      .sort((a, b) => catKey(a).localeCompare(catKey(b), 'th') || a.name.localeCompare(b.name, 'th'));
+    let lastCat = null;
     return `
       <div class="bar">
         ${branchSeg()}
-        <small>กรอกเฉพาะรายการที่นับ ส่วนต่างจากยอดในระบบจะบันทึกเป็นยอดใช้ของวันนี้</small>
+        <input type="search" placeholder="ค้นหาสินค้า แล้วกด Enter" value="${esc(countQuery)}" onchange="countQuery=this.value;render()">
+        <small>แสดง ${list.length} จาก ${S.items.length} รายการ</small>
       </div>
-      <div class="panel">${table(
-        '<th>สินค้า</th><th>หมวด</th><th class="n">ยอดในระบบ</th><th class="n">นับได้จริง</th><th class="n">ของเสีย</th>',
-        rows.map((r) => {
-          const it = find('items', r.item_id);
-          return `<tr><td>${esc(it.name)}</td><td>${esc(it.category)}</td><td class="n">${fmt(r.on_hand)} ${esc(it.unit)}</td>
-            <td class="n"><input type="number" min="0" step="0.1" data-count="${it.id}"></td>
-            <td class="n"><input type="number" min="0" step="0.1" data-waste="${it.id}"></td></tr>`;
-        }).join(''))}
-        <div class="foot"><button class="btn" onclick="saveCount()">บันทึกการนับ</button></div>
+      <div class="chips">
+        <button class="${countCats.size ? '' : 'on'}" onclick="countCats.clear();render()">ทุกหมวด (${S.items.length})</button>
+        ${countCatKeys.map((k, i) => `<button class="${countCats.has(k) ? 'on' : ''}" onclick="toggleCat(${i})">${esc(cats.get(k).label)} (${cats.get(k).n})</button>`).join('')}
+      </div>
+      <div class="panel">${list.length ? table(
+        '<th>สินค้า</th><th class="n">ยอดในระบบ</th><th class="n">นับได้จริง</th><th class="n">ของเสีย</th>',
+        list.map((it) => {
+          const r = S.rows.find((x) => x.branch_id === branch && x.item_id === it.id);
+          const d = countDraft[`${branch}:${it.id}`] || { c: '', w: '' };
+          const head = catKey(it) === lastCat ? '' :
+            `<tr class="grp"><td colspan="4">${esc(cats.get(catKey(it)).label)}<small>${list.filter((x) => catKey(x) === catKey(it)).length} รายการ</small></td></tr>`;
+          lastCat = catKey(it);
+          return `${head}<tr><td>${esc(it.name)}</td><td class="n">${fmt(r.on_hand)} ${esc(it.unit)}</td>
+            <td class="n"><input type="number" min="0" step="0.1" value="${esc(d.c)}" oninput="draftCount(${it.id},'c',this.value)"></td>
+            <td class="n"><input type="number" min="0" step="0.1" value="${esc(d.w)}" oninput="draftCount(${it.id},'w',this.value)"></td></tr>`;
+        }).join('')) : '<div class="empty">ไม่มีสินค้าที่ตรงกับตัวกรอง</div>'}
+        <div class="foot">
+          <small>กรอกแล้ว <b id="drafted">${draftedCount()}</b> รายการ ยอดที่กรอกไว้ไม่หายเมื่อเปลี่ยนหมวด ส่วนต่างจากยอดในระบบจะบันทึกเป็นยอดใช้ของวันนี้</small>
+          <button class="btn" onclick="saveCount()">บันทึกการนับ</button>
+        </div>
       </div>`;
   },
 
   suggest() {
-    const needs = S.rows.filter((r) => r.need > 0);
-    if (!needs.length) return '<div class="panel"><div class="empty">ตอนนี้ไม่มีรายการที่ต้องสั่ง</div></div>';
-    const total = needs.reduce((sum, r) => sum + r.need * find('items', r.item_id).price, 0);
+    const q = suggestQuery.trim().toLowerCase();
+    const rows = S.rows.filter((r) =>
+      (showAllSuggest || r.need > 0 || rowKey(r) in suggestDraft) &&
+      (suggestBranch === 'all' || r.branch_id === +suggestBranch) &&
+      (!q || find('items', r.item_id).name.toLowerCase().includes(q)));
+    const lines = new Map(rows.map((r) => [rowKey(r), orderLine(r)]));
+    const totals = orderTotals();
+    const edited = Object.keys(suggestDraft).length;
+    const suppliers = realSuppliers();
+    const option = (s, selected) => `<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${esc(s.name)}</option>`;
+    const trend = (r) => {
+      if (!r.prev_week_use) return '';
+      const pct = Math.round(((r.week_use - r.prev_week_use) / r.prev_week_use) * 100);
+      if (!pct) return '<span class="trend">เท่าสัปดาห์ก่อน</span>';
+      return `<span class="trend ${pct > 0 ? 'up' : 'down'}">${pct > 0 ? '▲' : '▼'} ${Math.abs(pct)}%</span>`;
+    };
+    // ผู้จัดจำหน่ายของสินค้านั้นขึ้นก่อน ตามด้วยรายอื่นทั้งหมด
+    const supplierSelect = (it, line, k) => {
+      const own = suppliers.filter((s) => it.supplier_ids.includes(s.id));
+      const others = suppliers.filter((s) => !it.supplier_ids.includes(s.id));
+      return `<select onchange="changeOrder('${k}','supplier_id',+this.value)">
+        ${line.supplier_id === S.unknown_supplier_id ? '<option value="" selected disabled>เลือกผู้จัดจำหน่าย</option>' : ''}
+        ${own.length
+          ? `<optgroup label="ผู้จัดจำหน่ายของสินค้านี้">${own.map((s) => option(s, line.supplier_id)).join('')}</optgroup>
+             <optgroup label="รายอื่น">${others.map((s) => option(s, line.supplier_id)).join('')}</optgroup>`
+          : others.map((s) => option(s, line.supplier_id)).join('')}
+      </select>`;
+    };
+
+    const unknownFirst = [...S.suppliers].sort((a, b) => (b.id === S.unknown_supplier_id) - (a.id === S.unknown_supplier_id));
+    const panels = unknownFirst.map((s) => {
+      const mine = rows
+        .filter((r) => lines.get(rowKey(r)).supplier_id === s.id)
+        .sort((a, b) => a.branch_id - b.branch_id || find('items', a.item_id).name.localeCompare(find('items', b.item_id).name, 'th'));
+      if (!mine.length) return '';
+      const isUnknown = s.id === S.unknown_supplier_id;
+      let lastBranch = null;
+      return `<div class="panel order">
+        <div class="head">
+          <div><b>${isUnknown ? 'ยังไม่ได้เลือกผู้จัดจำหน่าย' : esc(s.name)}</b>
+            <small style="display:block">${isUnknown ? 'เลือกผู้จัดจำหน่ายในแต่ละแถวก่อนสร้างใบสั่งซื้อ' : `ส่งของใน ${s.lead_days} วัน`} · ${mine.length} รายการ</small></div>
+          <div class="sum"><small>ยอดสั่งรายนี้</small><b data-sub="${s.id}">${baht(totals.bySupplier.get(s.id) || 0)}</b></div>
+        </div>
+        ${table(
+          '<th>สินค้า</th><th class="n">ใช้ 7 วันล่าสุด</th><th class="n">คงเหลือ</th><th class="n">ระบบแนะนำ</th><th>ผู้จัดจำหน่าย</th><th class="n">จำนวนสั่ง</th><th>หน่วย</th><th class="n">ราคา/หน่วย</th><th class="n">มูลค่า</th>',
+          mine.map((r) => {
+            const it = find('items', r.item_id);
+            const k = rowKey(r);
+            const line = lines.get(k);
+            const head = r.branch_id === lastBranch ? '' : `<tr class="grp"><td colspan="9">${esc(find('branches', r.branch_id).name)}</td></tr>`;
+            lastBranch = r.branch_id;
+            return `${head}<tr data-row="${k}" class="${line.qty !== line.suggested ? 'edited' : ''}">
+              <td>${esc(it.name)}<span class="sub">${esc(it.category)}${it.policy === 'weekly' ? '' : ` · ${POLICY[it.policy]}`}</span></td>
+              <td class="n">${fmt(r.week_use)}${trend(r)}</td>
+              <td class="n">${fmt(r.on_hand)}${r.on_order ? `<span class="sub">ค้างส่ง ${fmt(r.on_order)}</span>` : ''}</td>
+              <td class="n">${fmt(r.need)} ${esc(it.unit)}</td>
+              <td>${supplierSelect(it, line, k)}</td>
+              <td class="n"><span class="stepper">
+                <button type="button" title="ลด" onclick="stepOrder('${k}',-1)">−</button>
+                <input type="number" min="0" step="any" data-qty value="${line.qty}" oninput="draftOrder('${k}','qty',this.value)">
+                <button type="button" title="เพิ่ม" onclick="stepOrder('${k}',1)">+</button></span></td>
+              <td><select onchange="changeOrder('${k}','unit',this.value)">${S.units.map((u) =>
+                  `<option ${u === line.unit ? 'selected' : ''}>${esc(u)}</option>`).join('')}</select>
+                ${line.unit === it.unit ? '' : `<span class="sub">1 ${esc(line.unit)} = <input type="number" class="mini" min="0" step="any" value="${line.factor}" onchange="changeOrder('${k}','factor',this.value)"> ${esc(it.unit)}</span>`}</td>
+              <td class="n"><input type="number" class="price" min="0" step="any" value="${line.price}" oninput="draftOrder('${k}','price',this.value)"></td>
+              <td class="n" data-value>${baht(line.qty * line.price)}</td></tr>`;
+          }).join(''))}
+      </div>`;
+    }).join('');
+
     return `
-      <div class="bar">
-        <button class="btn" onclick="generate()">สร้างร่างใบสั่งซื้อ</button>
-        <small>${needs.length} รายการ รวมประมาณ ${baht(total)}</small>
+      <div class="steps">
+        <div><i>1</i><span><b>ตรวจรายการ</b><small>ระบบคำนวณจากยอดใช้สัปดาห์ที่ผ่านมา</small></span></div>
+        <div><i>2</i><span><b>ปรับรายละเอียด</b><small>ผู้จัดจำหน่าย จำนวน หน่วย และราคา แก้ได้ทุกแถว</small></span></div>
+        <div><i>3</i><span><b>สร้างร่างใบสั่งซื้อ</b><small>แยกตามผู้จัดจำหน่าย รออนุมัติอีกขั้น</small></span></div>
       </div>
-      ${S.suppliers.map((s) => {
-        const mine = needs.filter((r) => find('items', r.item_id).supplier_id === s.id);
-        if (!mine.length) return '';
-        return `<div class="panel">
-          <div class="head"><b>${esc(s.name)}</b><small>ส่งของใน ${s.lead_days} วัน</small></div>
-          ${table(
-            '<th>สาขา</th><th>สินค้า</th><th class="n">คงเหลือ</th><th class="n">ใช้เฉลี่ย/วัน</th><th class="n">พอใช้อีก (วัน)</th><th class="n">พาร์</th><th class="n">แนะนำสั่ง</th><th class="n">มูลค่า</th>',
-            mine.map((r) => {
-              const it = find('items', r.item_id);
-              return `<tr><td>${esc(find('branches', r.branch_id).name)}</td><td>${esc(it.name)}</td>
-                <td class="n">${fmt(r.on_hand)}</td><td class="n">${fmt(r.avg_use)}</td>
-                <td class="n">${r.cover_days == null ? '-' : fmt(r.cover_days)}</td><td class="n">${fmt(r.par)}</td>
-                <td class="n"><b>${fmt(r.need)}</b> ${esc(it.unit)}</td><td class="n">${baht(r.need * it.price)}</td></tr>`;
-            }).join(''))}
-        </div>`;
-      }).join('')}`;
+      <div class="cards">
+        <div class="card warn"><span>รายการที่จะสั่ง</span><b id="sumItems">${totals.count}</b></div>
+        <div class="card"><span>ผู้จัดจำหน่าย</span><b id="sumSuppliers">${totals.bySupplier.size}</b></div>
+        <div class="card"><span>มูลค่ารวมโดยประมาณ</span><b id="sumTotal">${baht(totals.total)}</b></div>
+      </div>
+      <div class="note">
+        <span>วิธีคิดของสินค้าสั่งรายสัปดาห์:</span>
+        <span class="pill">ใช้ 7 วันล่าสุด</span><span class="op">−</span><span class="pill">คงเหลือ</span><span class="op">−</span><span class="pill">ค้างส่ง</span>
+        <span class="op">=</span><span class="pill">ระบบแนะนำ</span><span>ถ้าเลือกหน่วยสั่งซื้อที่ต่างจากหน่วยสต็อก ให้ใส่ว่า 1 หน่วยเท่ากับกี่หน่วยสต็อก</span>
+      </div>
+      <div class="bar">
+        <div class="seg">
+          <button class="${suggestBranch === 'all' ? 'on' : ''}" onclick="suggestBranch='all';render()">ทุกสาขา</button>
+          ${S.branches.map((b) => `<button class="${String(b.id) === String(suggestBranch) ? 'on' : ''}" onclick="suggestBranch=${b.id};render()">${esc(b.name)}</button>`).join('')}
+        </div>
+        <input type="search" placeholder="ค้นหาสินค้า แล้วกด Enter" value="${esc(suggestQuery)}" onchange="suggestQuery=this.value;render()">
+        <label class="check"><input type="checkbox" ${showAllSuggest ? 'checked' : ''} onchange="showAllSuggest=this.checked;render()"> แสดงสินค้าที่ระบบไม่ได้แนะนำด้วย</label>
+      </div>
+      ${panels || `<div class="panel"><div class="empty">${showAllSuggest || q || suggestBranch !== 'all'
+        ? 'ไม่มีสินค้าที่ตรงกับตัวกรอง'
+        : 'ยังไม่มีรายการที่ระบบแนะนำ เพราะยังไม่มียอดใช้ในระบบ (ยอดใช้มาจากการนับสต็อก) ติ๊ก "แสดงสินค้าที่ระบบไม่ได้แนะนำด้วย" เพื่อกรอกจำนวนสั่งเอง'}</div></div>`}
+      <div class="orderbar">
+        <div><small>ยอดสั่งทั้งหมด</small><b id="barSummary">${orderBarText(totals)}</b></div>
+        <div class="actions">
+          <button class="btn ghost" id="resetOrders" ${edited ? '' : 'hidden'} onclick="resetOrders()">ล้างที่แก้ไว้ทั้งหมด</button>
+          <button class="btn big" onclick="generate()">สร้างร่างใบสั่งซื้อ</button>
+        </div>
+      </div>`;
   },
 
   po() {
     if (!S.pos.length) return '<div class="panel"><div class="empty">ยังไม่มีใบสั่งซื้อ ไปที่แท็บ "แนะนำสั่งซื้อ" เพื่อสร้างร่าง</div></div>';
     return S.pos.map((p) => {
       const s = find('suppliers', p.supplier_id);
+      const a = poAmounts(p);
       const qtyCell = (l) => {
-        if (p.status === 'draft') return `<input type="number" min="0" value="${l.qty}" onchange="act('/api/po/line',{id:${l.id},qty:+this.value})">`;
+        if (p.status === 'draft') return `<input type="number" min="0" step="any" value="${l.qty}" onchange="act('/api/po/line',{id:${l.id},qty:+this.value})">`;
         if (p.status === 'approved') return `${fmt(l.qty)}</td><td class="n"><input type="number" min="0" step="0.1" value="${l.qty}" data-recv="${p.id}" data-line="${l.id}">`;
         return `${fmt(l.qty)}</td><td class="n ${l.received_qty !== l.qty ? 'diff' : ''}">${fmt(l.received_qty ?? 0)}`;
       };
@@ -228,25 +663,36 @@ const VIEWS = {
       }[p.status];
       return `<div class="panel">
         <div class="head">
-          <div><b>PO-${p.id} ${esc(s.name)}</b> <span class="tag ${p.status === 'draft' ? 'low' : ''}">${PO_STATUS[p.status]}</span></div>
-          <small>สั่ง ${thaiDate(p.created)} · กำหนดส่ง ${thaiDate(p.deliver_date)} · รวม ${baht(poTotal(p))}</small>
+          <div><b>${docNo(p)}</b> <span class="tag ${p.status === 'draft' ? 'low' : ''}">${PO_STATUS[p.status]}</span>
+            <small style="display:block">${esc(s.name)} · สั่งโดย ${esc(find('branches', p.branch_id)?.name ?? '')}</small></div>
+          <small>วันที่ออก ${docDate(p.created)} · กำหนดส่ง ${docDate(p.deliver_date)} · รวมทั้งสิ้น ${money(a.total)} บาท</small>
         </div>
         ${table(
-          `<th>สาขา</th><th>สินค้า</th><th class="n">จำนวนสั่ง</th>${p.status === 'draft' ? '' : '<th class="n">รับจริง</th>'}<th class="n">ราคา/หน่วย</th><th class="n">รวม</th>`,
+          `<th>สินค้า</th><th class="n">จำนวนสั่ง</th>${p.status === 'draft' ? '' : '<th class="n">รับจริง</th>'}<th class="n">ราคา/หน่วย</th><th class="n">รวม</th>`,
           p.lines.map((l) => {
             const it = find('items', l.item_id);
-            return `<tr><td>${esc(find('branches', l.branch_id).name)}</td><td>${esc(it.name)} (${esc(it.unit)})</td>
-              <td class="n">${qtyCell(l)}</td><td class="n">${fmt(l.price)}</td><td class="n">${baht(l.qty * l.price)}</td></tr>`;
+            return `<tr><td>${esc(it.name)} (${esc(l.unit || it.unit)})${l.unit && l.unit !== it.unit ? `<span class="sub">1 ${esc(l.unit)} = ${fmt(l.unit_factor)} ${esc(it.unit)}</span>` : ''}</td>
+              <td class="n">${qtyCell(l)}</td><td class="n">${money(l.price)}</td><td class="n">${money(l.qty * l.price)}</td></tr>`;
           }).join(''))}
         ${openText.has(p.id) ? `<textarea readonly onclick="this.select()">${esc(poText(p))}</textarea>` : ''}
-        ${buttons ? `<div class="foot">${buttons}</div>` : ''}
+        <div class="foot">
+          <small style="margin-right:auto">ก่อน VAT ${money(a.net)} · VAT ${a.rate ? `${a.rate}% ${money(a.vat)}` : 'ไม่มี'}</small>
+          <button class="btn ghost" onclick="previewPO(${p.id})">ดูตัวอย่างเอกสาร</button>
+          ${buttons}
+        </div>
       </div>`;
     }).join('');
   },
 
   items() {
     const list = visibleItems();
-    const countOf = (id) => S.items.filter((it) => it.supplier_id === id).length;
+    const countOf = (id) => S.items.filter((it) => hasSupplier(it, id)).length;
+    const summary = (it) => {
+      if (!it.supplier_ids.length) return '<span class="tag low">ยังไม่ระบุ</span>';
+      const more = it.supplier_ids.length - 1;
+      return `<span class="name">${esc(find('suppliers', it.supplier_id).name)}</span>${more ? `<span class="tag">+${more} ราย</span>` : ''}`;
+    };
+    const names = (it) => it.supplier_ids.map((id) => find('suppliers', id).name).join(', ');
     return `
       <div class="bar">
         <input type="search" placeholder="ค้นหาชื่อหรือหมวด แล้วกด Enter" value="${esc(itemQuery)}" onchange="itemQuery=this.value;render()">
@@ -259,16 +705,17 @@ const VIEWS = {
       </div>
       <div class="bar">
         <select id="bulkSupplier">${supplierOptions()}</select>
-        <button class="btn ghost" onclick="bulkSupplier()">กำหนดผู้จัดจำหน่ายให้ ${list.length} รายการที่แสดงอยู่</button>
+        <label class="check"><input type="checkbox" id="bulkPrimary"> ตั้งเป็นรายหลัก</label>
+        <button class="btn ghost" onclick="bulkSupplier()">เพิ่มผู้จัดจำหน่ายให้ ${list.length} รายการที่แสดงอยู่</button>
       </div>
-      <div class="bar"><small>พาร์คือระดับสต็อกที่ต้องการให้มีหลังของมาส่ง ทุกช่องแก้ไขได้ ระบบบันทึกทันที</small></div>
+      <div class="bar"><small>สินค้าหนึ่งรายการมีผู้จัดจำหน่ายได้หลายราย ใบสั่งซื้อจะออกถึงรายหลัก คลิกที่ช่องผู้จัดจำหน่ายเพื่อแก้ไข ช่องอื่นแก้แล้วบันทึกทันที</small></div>
       <div class="panel">${table(
         `<th>สินค้า</th><th>หมวด</th><th>วิธีสั่ง</th><th>ผู้จัดจำหน่าย</th><th class="n">สั่งทีละ</th><th class="n">ราคา</th>
          ${S.branches.map((b) => `<th class="n">พาร์ ${esc(b.name)}</th>`).join('')}`,
         list.map((it) => `<tr><td>${esc(it.name)}</td><td>${esc(it.category)}</td>
           <td><select onchange="act('/api/item',{id:${it.id},policy:this.value})">${Object.entries(POLICY).map(([value, label]) =>
             `<option value="${value}" ${value === it.policy ? 'selected' : ''}>${label}</option>`).join('')}</select></td>
-          <td><select onchange="act('/api/item',{id:${it.id},supplier_id:+this.value})">${supplierOptions(it.supplier_id)}</select></td>
+          <td><button class="pick" title="${esc(names(it))}" onclick="editSuppliers(${it.id})">${summary(it)}</button></td>
           <td class="n"><input type="number" min="0" step="any" value="${it.pack}" onchange="act('/api/item',{id:${it.id},pack:+this.value})"> ${esc(it.unit)}</td>
           <td class="n">${fmt(it.price)}</td>
           ${S.branches.map((b) => {
@@ -278,7 +725,7 @@ const VIEWS = {
   },
 
   suppliers() {
-    const itemCount = (id) => S.items.filter((it) => it.supplier_id === id).length;
+    const itemCount = (id) => S.items.filter((it) => hasSupplier(it, id)).length;
     return `
       <div class="panel">
         <div class="head"><b>นำเข้าผู้จัดจำหน่าย</b><small>คัดลอกตารางผู้จัดจำหน่ายจากหน้าเว็บ FoodStory มาวาง รายที่ชื่อตรงกันจะถูกอัปเดต</small></div>
@@ -288,11 +735,57 @@ const VIEWS = {
       </div>
       <div class="bar"><small>${S.suppliers.length} ราย ระยะส่งของใช้คำนวณจุดสั่งซื้อและวันกำหนดส่ง แก้ไขได้ ระบบบันทึกทันที</small></div>
       <div class="panel">${table(
-        '<th>รหัส</th><th>ชื่อ</th><th>VAT</th><th class="n">เครดิต (วัน)</th><th class="n">ระยะส่งของ (วัน)</th><th class="n">รายการใน FoodStory</th><th class="n">สินค้าที่ผูกในระบบนี้</th><th>ที่อยู่</th>',
+        '<th>รหัส</th><th>ชื่อ</th><th>VAT</th><th class="n">เครดิต (วัน)</th><th class="n">ระยะส่งของ (วัน)</th><th class="n">รายการใน FoodStory</th><th class="n">สินค้าที่ผูกในระบบนี้</th><th>ที่อยู่</th><th></th>',
         S.suppliers.map((s) => `<tr><td>${esc(s.code ?? '')}</td><td>${esc(s.name)}</td>
           <td>${s.vat == null ? '' : s.vat ? 'มี' : 'ไม่มี'}</td><td class="n">${s.credit_days ?? ''}</td>
           <td class="n"><input type="number" min="0" value="${s.lead_days}" onchange="act('/api/supplier',{id:${s.id},lead_days:+this.value})"></td>
-          <td class="n">${s.fs_item_count ?? ''}</td><td class="n">${itemCount(s.id)}</td><td>${esc(s.address ?? '')}</td></tr>`).join(''))}</div>`;
+          <td class="n">${s.fs_item_count ?? ''}</td><td class="n">${itemCount(s.id)}</td><td>${esc(s.address ?? '')}</td>
+          <td><button class="btn ghost" onclick="editSupplier(${s.id})">แก้ไข</button></td></tr>`).join(''))}</div>`;
+  },
+
+  settings() {
+    const v = S.settings;
+    return `
+      <div class="panel">
+        <div class="head"><b>ผู้สั่งซื้อ (นิติบุคคลของแต่ละสาขา)</b><small>แสดงที่หัวเอกสารใบสั่งซื้อของสาขานั้น</small></div>
+        ${table('<th>ชื่อ</th><th>ที่อยู่</th><th>เลขประจำตัวผู้เสียภาษี</th><th>โทรศัพท์</th>',
+          S.branches.map((b) => `<tr data-branch="${b.id}"><td>${esc(b.name)}</td>
+            <td><input type="text" data-f="address" value="${esc(b.address ?? '')}" onchange="saveBranch(${b.id})" style="min-width:320px"></td>
+            <td><input type="text" data-f="tax_id" value="${esc(b.tax_id ?? '')}" onchange="saveBranch(${b.id})"></td>
+            <td><input type="text" data-f="phone" value="${esc(b.phone ?? '')}" onchange="saveBranch(${b.id})"></td></tr>`).join(''))}
+      </div>
+      <div class="panel">
+        <div class="head"><b>ผู้ลงนามสั่งซื้อ</b><small>ชื่อและลายเซ็นในช่อง "ผู้สั่งซื้อ" ท้ายเอกสาร</small></div>
+        <div class="form-grid">
+          <label>ชื่อผู้สั่งซื้อ</label><input type="text" value="${esc(v.buyer_name ?? '')}" onchange="act('/api/settings',{buyer_name:this.value})">
+          <label>ตำแหน่ง</label><input type="text" value="${esc(v.buyer_position ?? '')}" onchange="act('/api/settings',{buyer_position:this.value})">
+          <label>รูปลายเซ็น</label>
+          <div class="bar" style="margin:0">
+            ${v.signature ? `<img class="sig-preview" src="${esc(v.signature)}" alt="ลายเซ็น">` : '<small>ยังไม่มีรูป เอกสารจะเว้นช่องไว้ให้เซ็นด้วยมือ</small>'}
+            <input type="file" accept="image/png,image/jpeg" onchange="saveSignature(this.files[0])">
+            ${v.signature ? `<button class="btn ghost" onclick="act('/api/settings',{signature:''})">ลบรูป</button>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="head"><b>สำรองและกู้คืนข้อมูล</b><small>ไฟล์สำรองมีข้อมูลทั้งหมดของระบบ ใช้ย้ายข้อมูลระหว่างเครื่องกับระบบออนไลน์ได้</small></div>
+        <div class="form-grid">
+          <label>สำรองข้อมูล</label><div><a class="btn ghost" style="display:inline-block;text-decoration:none;padding:8px 16px;border-radius:8px;border:1px solid #99d5cd;color:var(--brand-dark);font-weight:600" href="/api/backup">ดาวน์โหลดไฟล์สำรอง</a></div>
+          <label>กู้คืนจากไฟล์สำรอง</label>
+          <div class="bar" style="margin:0"><input type="file" id="restoreFile" accept=".db"><button class="btn ghost" onclick="restoreBackup()">กู้คืน</button></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="head"><b>ภาษีมูลค่าเพิ่ม</b><small>คิด VAT เฉพาะผู้จัดจำหน่ายที่ตั้งว่า "มี VAT" ในแท็บผู้จัดจำหน่าย</small></div>
+        <div class="form-grid">
+          <label>อัตรา VAT (%)</label><div><input type="number" min="0" step="any" value="${esc(v.vat_rate || '7')}" onchange="act('/api/settings',{vat_rate:this.value})"></div>
+          <label>ราคาที่กรอก</label>
+          <select onchange="act('/api/settings',{price_includes_vat:this.value})" style="max-width:340px">
+            <option value="0" ${v.price_includes_vat === '1' ? '' : 'selected'}>ยังไม่รวม VAT (บวก VAT เพิ่มท้ายเอกสาร)</option>
+            <option value="1" ${v.price_includes_vat === '1' ? 'selected' : ''}>รวม VAT แล้ว (ถอด VAT ออกแสดงแยก)</option>
+          </select>
+        </div>
+      </div>`;
   },
 
   recipes() {
@@ -327,20 +820,176 @@ const VIEWS = {
 };
 
 // ข้อความสำหรับส่งให้ซัพพลายเออร์ แยกจุดส่งตามสาขา
+// เลขที่เอกสาร: PO-ปีเดือนที่ออก-ลำดับ เช่น PO-202610-0001
+const docNo = (p) => `PO-${p.created.slice(0, 4)}${p.created.slice(5, 7)}-${String(p.id).padStart(4, '0')}`;
+const docDate = (d) => new Date(d + 'T00:00').toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+const money = (n) => Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// ยอดก่อน VAT, VAT และยอดรวมของใบสั่งซื้อ ตามการตั้งค่า VAT และสถานะ VAT ของผู้จัดจำหน่าย
+function poAmounts(p) {
+  const sum = poTotal(p);
+  const rate = find('suppliers', p.supplier_id).vat ? +(S.settings.vat_rate || 7) : 0;
+  if (S.settings.price_includes_vat === '1') {
+    const net = round2(sum / (1 + rate / 100));
+    return { rate, net, vat: round2(sum - net), total: round2(sum) };
+  }
+  const vat = round2((sum * rate) / 100);
+  return { rate, net: round2(sum), vat, total: round2(sum + vat) };
+}
+
+// จำนวนเงินเป็นตัวอักษรภาษาไทย
+function bahtText(amount) {
+  const digit = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+  const place = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'];
+  const read = (n) => {
+    const s = String(n);
+    if (s.length > 6) return read(+s.slice(0, -6)) + 'ล้าน' + (+s.slice(-6) ? read(+s.slice(-6)) : '');
+    let out = '';
+    for (let i = 0; i < s.length; i++) {
+      const d = +s[i];
+      const pos = s.length - 1 - i;
+      if (!d) continue;
+      if (pos === 1) out += d === 1 ? 'สิบ' : d === 2 ? 'ยี่สิบ' : digit[d] + 'สิบ';
+      else if (pos === 0 && d === 1 && s.length > 1) out += 'เอ็ด';
+      else out += digit[d] + place[pos];
+    }
+    return out;
+  };
+  const satangTotal = Math.round(amount * 100);
+  const whole = Math.floor(satangTotal / 100);
+  const satang = satangTotal % 100;
+  return (whole ? read(whole) : 'ศูนย์') + 'บาท' + (satang ? read(satang) + 'สตางค์' : 'ถ้วน');
+}
+
 function poText(p) {
   const s = find('suppliers', p.supplier_id);
-  const parts = [`ใบสั่งซื้อ PO-${p.id}`, `ถึง: ${s.name}`, `กำหนดส่ง: ${thaiDate(p.deliver_date)}`];
+  const a = poAmounts(p);
+  const parts = [`ใบสั่งซื้อ ${docNo(p)}`, `วันที่ ${docDate(p.created)}`, `ถึง: ${s.name}`, `กำหนดส่ง: ${docDate(p.deliver_date)}`];
   for (const b of S.branches) {
     const lines = p.lines.filter((l) => l.branch_id === b.id);
     if (!lines.length) continue;
     parts.push('', `[${b.name}]`);
     for (const l of lines) {
       const it = find('items', l.item_id);
-      parts.push(`- ${it.name} ${fmt(l.qty)} ${it.unit}`);
+      parts.push(`- ${it.name} ${fmt(l.qty)} ${l.unit || it.unit}`);
     }
   }
-  parts.push('', `รวม ${baht(poTotal(p))}`);
+  parts.push('', `รวม ${money(a.total)} บาท${a.rate ? ` (รวม VAT ${a.rate}% ${money(a.vat)})` : ''}`);
   return parts.join('\n');
+}
+
+// ตัวอย่างเอกสารใบสั่งซื้อขนาด A4 พิมพ์หรือบันทึกเป็น PDF ได้จากปุ่มพิมพ์
+function previewPO(id) {
+  const p = S.pos.find((x) => x.id === id);
+  const s = find('suppliers', p.supplier_id);
+  const b = find('branches', p.branch_id) || {};
+  const a = poAmounts(p);
+  const v = S.settings;
+  const line = (label, value) => (value ? `<div><span class="muted">${label}</span> ${esc(value)}</div>` : '');
+  const doc = document.getElementById('doc');
+  doc.innerHTML = `
+    <div class="doc-actions">
+      <b>ตัวอย่างเอกสาร ${docNo(p)}</b>
+      <div class="bar" style="margin:0">
+        <button class="btn ghost" onclick="document.getElementById('doc').close()">ปิด</button>
+        <button class="btn" onclick="window.print()">พิมพ์ / บันทึกเป็น PDF</button>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="doc-top">
+        <div class="company">
+          <b>${esc(b.name ?? '')}</b>
+          ${b.address ? `<div>${esc(b.address)}</div>` : ''}
+          ${line('เลขประจำตัวผู้เสียภาษี', b.tax_id)}${line('โทร.', b.phone)}
+        </div>
+        <div class="doc-title">
+          <h3>ใบสั่งซื้อ</h3><span>PURCHASE ORDER</span>
+          <table class="doc-meta">
+            <tr><td>เลขที่เอกสาร</td><td class="no">${docNo(p)}</td></tr>
+            <tr><td>วันที่ออกเอกสาร</td><td>${docDate(p.created)}</td></tr>
+            <tr><td>กำหนดส่งของ</td><td>${docDate(p.deliver_date)}</td></tr>
+            ${s.credit_days != null ? `<tr><td>เครดิต</td><td>${s.credit_days ? `${s.credit_days} วัน` : 'เงินสด'}</td></tr>` : ''}
+            ${p.status === 'draft' ? '<tr><td>สถานะ</td><td class="draft-mark">ร่าง ยังไม่อนุมัติ</td></tr>' : ''}
+          </table>
+        </div>
+      </div>
+      <div class="parties">
+        <div class="party"><h4>ผู้จัดจำหน่าย</h4><b>${esc(s.name)}</b>
+          ${s.address ? `<div>${esc(s.address)}</div>` : ''}
+          ${line('เลขประจำตัวผู้เสียภาษี', s.tax_id)}${line('ติดต่อ', s.contact)}${line('รหัสผู้จัดจำหน่าย', s.code)}</div>
+        <div class="party"><h4>ผู้สั่งซื้อ / สถานที่ส่งของ</h4><b>${esc(b.name ?? '')}</b>
+          ${b.address ? `<div>${esc(b.address)}</div>` : ''}
+          ${line('ผู้ติดต่อ', v.buyer_name)}${line('โทร.', b.phone)}</div>
+      </div>
+      <table class="lines">
+        <thead><tr><th class="n">ลำดับ</th><th>รายการ</th><th class="n">จำนวน</th><th>หน่วย</th><th class="n">ราคา/หน่วย</th><th class="n">จำนวนเงิน</th></tr></thead>
+        <tbody>${p.lines.map((l, i) => {
+          const it = find('items', l.item_id);
+          return `<tr><td class="n">${i + 1}</td><td>${esc(it.name)}</td><td class="n">${fmt(l.qty)}</td><td>${esc(l.unit || it.unit)}</td>
+            <td class="n">${money(l.price)}</td><td class="n">${money(l.qty * l.price)}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+      <div class="doc-bottom">
+        <div class="words"><span class="muted">จำนวนเงินรวมทั้งสิ้น (ตัวอักษร)</span><br><b>${bahtText(a.total)}</b>
+          <div class="muted" style="margin-top:4px">${a.rate
+            ? (v.price_includes_vat === '1' ? 'ราคาต่อหน่วยรวมภาษีมูลค่าเพิ่มแล้ว' : 'ราคาต่อหน่วยยังไม่รวมภาษีมูลค่าเพิ่ม')
+            : 'ผู้จัดจำหน่ายรายนี้ไม่มีภาษีมูลค่าเพิ่ม'}</div></div>
+        <table class="totals">
+          <tr><td>รวมเป็นเงิน (ก่อน VAT)</td><td>${money(a.net)}</td></tr>
+          <tr><td>ภาษีมูลค่าเพิ่ม ${a.rate}%</td><td>${money(a.vat)}</td></tr>
+          <tr class="grand"><td>จำนวนเงินรวมทั้งสิ้น</td><td>${money(a.total)}</td></tr>
+        </table>
+      </div>
+      <div class="signs">
+        <div class="sign"><div class="ink">${v.signature ? `<img src="${esc(v.signature)}" alt="">` : ''}</div>
+          <b>${esc(v.buyer_name || '(.......................................)')}</b><small>ผู้สั่งซื้อ${v.buyer_position ? ` · ${esc(v.buyer_position)}` : ''}</small><small>วันที่ ${docDate(p.created)}</small></div>
+        <div class="sign"><div class="ink"></div><b>(.......................................)</b><small>ผู้อนุมัติ</small><small>วันที่ ....../....../......</small></div>
+        <div class="sign"><div class="ink"></div><b>(.......................................)</b><small>ผู้จัดจำหน่ายรับทราบ</small><small>วันที่ ....../....../......</small></div>
+      </div>
+    </div>`;
+  doc.showModal();
+  doc.scrollTop = 0;
+}
+
+function saveBranch(id) {
+  const row = document.querySelector(`tr[data-branch="${id}"]`);
+  const value = (f) => row.querySelector(`[data-f="${f}"]`).value;
+  act('/api/branch', { id, address: value('address'), tax_id: value('tax_id'), phone: value('phone') });
+}
+
+function saveSignature(file) {
+  if (!file) return;
+  if (file.size > 400 * 1024) return notify('รูปลายเซ็นต้องไม่เกิน 400 KB');
+  const reader = new FileReader();
+  reader.onload = () => act('/api/settings', { signature: reader.result });
+  reader.readAsDataURL(file);
+}
+
+function editSupplier(id) {
+  const s = find('suppliers', id);
+  const dlg = document.getElementById('dlg');
+  dlg.innerHTML = `
+    <div class="dlg-head"><b>${esc(s.name)}</b><small>ข้อมูลนี้แสดงในช่องผู้จัดจำหน่ายบนใบสั่งซื้อ</small></div>
+    <div class="form-grid" style="border-top:1px solid var(--line)">
+      <label>ที่อยู่</label><textarea data-f="address">${esc(s.address ?? '')}</textarea>
+      <label>เลขประจำตัวผู้เสียภาษี</label><input type="text" data-f="tax_id" value="${esc(s.tax_id ?? '')}">
+      <label>ผู้ติดต่อ / โทร. / LINE</label><input type="text" data-f="contact" value="${esc(s.contact ?? '')}">
+      <label>เครดิต (วัน)</label><div><input type="number" min="0" data-f="credit_days" value="${s.credit_days ?? ''}"></div>
+      <label>ภาษีมูลค่าเพิ่ม</label>
+      <select data-f="vat"><option value="1" ${s.vat ? 'selected' : ''}>มี VAT</option><option value="0" ${s.vat ? '' : 'selected'}>ไม่มี VAT</option></select>
+    </div>
+    <div class="foot">
+      <button class="btn ghost" onclick="document.getElementById('dlg').close()">ยกเลิก</button>
+      <button class="btn" onclick="saveSupplier(${id})">บันทึก</button>
+    </div>`;
+  dlg.showModal();
+}
+
+function saveSupplier(id) {
+  const dlg = document.getElementById('dlg');
+  const fields = Object.fromEntries([...dlg.querySelectorAll('[data-f]')].map((el) => [el.dataset.f, el.value]));
+  dlg.close();
+  act('/api/supplier', { id, ...fields });
 }
 
 function toggleText(id) {
@@ -348,25 +997,129 @@ function toggleText(id) {
   render();
 }
 
-function saveCount() {
+async function saveCount() {
+  const keys = Object.keys(countDraft).filter((k) => k.startsWith(branch + ':'));
   const lines = [];
-  for (const input of document.querySelectorAll('[data-count]')) {
-    const item_id = +input.dataset.count;
-    const wasteInput = document.querySelector(`[data-waste="${item_id}"]`);
-    const waste = +wasteInput.value || 0;
-    if (input.value === '' && !waste) continue;
+  for (const k of keys) {
+    const item_id = +k.split(':')[1];
+    const d = countDraft[k];
+    const waste = +d.w || 0;
+    if (d.c === '' && !waste) continue;
     const row = S.rows.find((r) => r.branch_id === branch && r.item_id === item_id);
     // กรอกแต่ของเสีย ไม่ได้นับ: ถือว่ายอดที่เหลือตรงกับระบบ
-    const counted = input.value === '' ? row.on_hand - waste : +input.value;
-    lines.push({ item_id, counted, waste });
+    lines.push({ item_id, counted: d.c === '' ? row.on_hand - waste : +d.c, waste });
   }
-  if (!lines.length) return alert('ยังไม่ได้กรอกจำนวน');
-  act('/api/count', { branch_id: branch, lines });
+  if (!lines.length) return notify('ยังไม่ได้กรอกจำนวน');
+  try {
+    setState(await api('/api/count', { branch_id: branch, lines }));
+    for (const k of keys) delete countDraft[k];
+    render();
+    notify(`บันทึกการนับ ${lines.length} รายการแล้ว`, 'ok');
+  } catch (err) {
+    notify(err.message);
+  }
+}
+
+const rowKey = (r) => `${r.branch_id}:${r.item_id}`;
+const rowByKey = (k) => {
+  const [branch_id, item_id] = k.split(':').map(Number);
+  return S.rows.find((r) => r.branch_id === branch_id && r.item_id === item_id);
+};
+const round2 = (n) => Math.round(n * 100) / 100;
+
+// บรรทัดสั่งซื้อของสินค้าหนึ่งรายการในหนึ่งสาขา: ค่าเริ่มต้นจากข้อมูลสินค้า ทับด้วยค่าที่แก้ในหน้านี้
+// factor = หน่วยสั่งซื้อ 1 หน่วย เท่ากับกี่หน่วยสต็อก
+function orderLine(r) {
+  const it = find('items', r.item_id);
+  const d = suggestDraft[rowKey(r)] || {};
+  const unit = d.unit ?? it.order_unit ?? it.unit;
+  const factor = unit === it.unit ? 1 : +(d.factor ?? (unit === it.order_unit ? it.order_factor : 1)) || 1;
+  const suggested = factor === 1 ? r.need : Math.ceil(round2(r.need / factor));
+  return {
+    branch_id: r.branch_id,
+    item_id: r.item_id,
+    unit,
+    factor,
+    suggested,
+    qty: d.qty != null ? +d.qty || 0 : suggested,
+    price: d.price != null ? +d.price || 0 : round2(it.price * factor),
+    supplier_id: d.supplier_id ?? it.supplier_id,
+  };
+}
+
+// ยอดสั่งรวมของทุกสาขา นับจากค่าที่แก้แล้ว
+function orderTotals() {
+  const bySupplier = new Map();
+  let count = 0;
+  let total = 0;
+  for (const r of S.rows) {
+    const line = orderLine(r);
+    if (line.qty <= 0) continue;
+    count++;
+    total += line.qty * line.price;
+    bySupplier.set(line.supplier_id, (bySupplier.get(line.supplier_id) || 0) + line.qty * line.price);
+  }
+  return { count, total, bySupplier };
+}
+
+const orderBarText = (t) => `${t.count} รายการ · ${t.bySupplier.size} ผู้จัดจำหน่าย · ${baht(t.total)}`;
+
+// แก้จำนวนหรือราคา: อัปเดตตัวเลขบนหน้าโดยไม่วาดใหม่ เพื่อไม่ให้ช่องที่กำลังพิมพ์หลุด
+function draftOrder(k, field, value) {
+  suggestDraft[k] = { ...suggestDraft[k], [field]: value };
+  const line = orderLine(rowByKey(k));
+  const tr = document.querySelector(`tr[data-row="${k}"]`);
+  tr.classList.toggle('edited', line.qty !== line.suggested);
+  tr.querySelector('[data-value]').textContent = baht(line.qty * line.price);
+  const t = orderTotals();
+  document.getElementById('sumItems').textContent = t.count;
+  document.getElementById('sumSuppliers').textContent = t.bySupplier.size;
+  document.getElementById('sumTotal').textContent = baht(t.total);
+  document.getElementById('barSummary').textContent = orderBarText(t);
+  document.getElementById('resetOrders').hidden = false;
+  for (const el of document.querySelectorAll('[data-sub]')) el.textContent = baht(t.bySupplier.get(+el.dataset.sub) || 0);
+}
+
+// เปลี่ยนผู้จัดจำหน่าย หน่วย หรืออัตราแปลงหน่วย: เปลี่ยนหน่วยแล้วจำนวนและราคาคิดใหม่ตามหน่วยนั้น
+function changeOrder(k, field, value) {
+  const d = { ...suggestDraft[k], [field]: value };
+  if (field !== 'supplier_id') {
+    delete d.qty;
+    delete d.price;
+    if (field === 'unit') delete d.factor;
+  }
+  suggestDraft[k] = d;
+  render();
+}
+
+// ปุ่ม − + ปรับทีละหนึ่งแพ็กเมื่อสั่งเป็นหน่วยสต็อก หรือทีละ 1 เมื่อสั่งเป็นหน่วยอื่น
+function stepOrder(k, direction) {
+  const r = rowByKey(k);
+  const line = orderLine(r);
+  const step = line.factor === 1 ? find('items', r.item_id).pack : 1;
+  const next = Math.max(0, round2(line.qty + direction * step));
+  document.querySelector(`tr[data-row="${k}"] [data-qty]`).value = next;
+  draftOrder(k, 'qty', String(next));
+}
+
+function resetOrders() {
+  for (const k of Object.keys(suggestDraft)) delete suggestDraft[k];
+  render();
 }
 
 async function generate() {
-  await act('/api/po/generate');
-  go('po');
+  const lines = S.rows.map(orderLine).filter((l) => l.qty > 0);
+  if (!lines.length) return notify('ยังไม่มีรายการที่จะสั่ง');
+  const missing = lines.filter((l) => l.supplier_id === S.unknown_supplier_id).length;
+  if (missing) return notify(`ยังไม่ได้เลือกผู้จัดจำหน่าย ${missing} รายการ เลือกให้ครบก่อนสร้างใบสั่งซื้อ`);
+  try {
+    setState(await api('/api/po/generate', { lines }));
+    for (const k of Object.keys(suggestDraft)) delete suggestDraft[k];
+    go('po');
+    notify('สร้างร่างใบสั่งซื้อแล้ว แก้จำนวนได้อีกก่อนกดอนุมัติ', 'ok');
+  } catch (err) {
+    notify(err.message);
+  }
 }
 
 function receive(id) {
@@ -379,23 +1132,23 @@ function receive(id) {
 
 async function importSuppliers() {
   const text = document.getElementById('supplierText').value;
-  if (!text.trim()) return alert('วางข้อความก่อน');
+  if (!text.trim()) return notify('วางข้อความก่อน');
   try {
     const data = await api('/api/import/suppliers', { text });
     lastSupplierImport = data.result;
     setState(data);
     render();
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
   }
 }
 
 async function importRecipes() {
   const file = document.getElementById('recipeFile').files[0];
-  if (!file) return alert('เลือกไฟล์ก่อน');
+  if (!file) return notify('เลือกไฟล์ก่อน');
   const res = await fetch('/api/import/recipes', { method: 'POST', body: file });
   const data = await res.json();
-  if (!res.ok) return alert(data.error);
+  if (!res.ok) return notify(data.error);
   lastImport = data.result;
   setState(data);
   render();
